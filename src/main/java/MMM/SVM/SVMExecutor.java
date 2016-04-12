@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import MMM.MISC.EditaValores;
 import MMM.MISC.LeituraProperties;
 import MMM.MISC.Log;
 
@@ -20,8 +19,8 @@ import MMM.MISC.Log;
  */
 public class SVMExecutor {
 
-    private int numThreads;
-    private String nomArqARFF;
+    private final int numThreads;
+    private final String nomArqARFF;
 
     public SVMExecutor(String nomArqARFF) {
         this.nomArqARFF = nomArqARFF;
@@ -32,13 +31,12 @@ public class SVMExecutor {
 
         try {
 
-            ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM();
+            ManipuladorParSVM manipuladorParametroSVM = new ManipuladorParSVM();
             manipuladorParametroSVM.populaAnalise();
             ArrayList<ParametroSVM> analise = manipuladorParametroSVM.getParametroSVM();
 
             //Varre as opções de análise
             for (int i = 0; i < analise.size(); i++) {
-
 
                 //THREAD
                 new Thread(new WekaSVM(nomArqARFF, analise.get(i), i)).start();
@@ -88,18 +86,14 @@ public class SVMExecutor {
             BufferedWriter resultado = new BufferedWriter(strWriter);
 
             //Cabeçalho
-            resultado.
-                    write("ativo;cost;gamma;tam_treino;evaluation;kernel;type;valor_real;valor_predito;diffMod;perc_acerto");
+            resultado.write("ativo;" + analise.get(0).montaCabecalho());
             resultado.newLine();
 
             Log.loga("Iniciando exportação do arquivo CSV", "SVM");
             //Varre as opções de análise
             for (int i = 0; i < analise.size(); i++) {
-                //Se possui resultado na ocorrência
-                if (ManipuladorResultadoSVM.getInstance().getResultado(i) != null) {
-                    resultado.write(montaLinha(analise.get(i), ManipuladorResultadoSVM.getInstance().getResultado(i)));
-                    resultado.newLine();
-                }
+                resultado.write(montaLinha(analise.get(i)));
+                resultado.newLine();
             }
             resultado.flush();
             resultado.close();
@@ -109,31 +103,14 @@ public class SVMExecutor {
 
     }
 
-    private String montaLinha(ParametroSVM parametroSVM, ResultadoSVM resultadoSVM) throws WekaSVMException,
+    private String montaLinha(ParametroSVM parametroSVM) throws WekaSVMException,
             ParametroSVMException {
 
         StringBuilder linha = new StringBuilder();
+
         linha.append(getName());
         linha.append(";");
-        linha.append(EditaValores.editaVirgula(parametroSVM.getCost()));
-        linha.append(";");
-        linha.append(EditaValores.editaVirgula(parametroSVM.getGamma()));
-        linha.append(";");
-        linha.append(parametroSVM.getTamanhoDoConjunto());
-        linha.append(";");
-        linha.append(parametroSVM.getGridSearchEvaluationAlfa());
-        linha.append(";");
-        linha.append(parametroSVM.getKernelAlfa());
-        linha.append(";");
-        linha.append(parametroSVM.getTypeAlfa());
-        linha.append(";");
-        linha.append(EditaValores.edita2DecVirgula(resultadoSVM.getReal()));
-        linha.append(";");
-        linha.append(EditaValores.edita2DecVirgula(resultadoSVM.getPredict()));
-        linha.append(";");
-        linha.append(EditaValores.edita2DecVirgula(resultadoSVM.getDiffMod()));
-        linha.append(";");
-        linha.append(EditaValores.edita2DecVirgula(resultadoSVM.getPercentualAcerto()));
+        linha.append(parametroSVM.montaLinha());
 
         //Retorna a linha montada
         return linha.toString();

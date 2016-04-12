@@ -29,6 +29,11 @@ public class Log {
 
     }
 
+    public static void buffAtivo(String ativo) throws FileNotFoundException {
+        System.setOut(new PrintStream("c:/temp/output_weka_out" + ativo + ".txt"));
+        System.setErr(new PrintStream("c:/temp/output_weka_err " + ativo + ".txt"));
+    }
+    
     public static void loga(String mensagem) {
         if (LOG == 1) {
             defOut.println(mensagem);

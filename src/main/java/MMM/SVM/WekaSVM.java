@@ -66,7 +66,6 @@ public class WekaSVM implements Runnable {
                 getKernelAlfa() + " TYPE:" + parametrosSVM.getTypeAlfa() + " COST:" + svm.getCost() + " gamma:" +
                 svm.getGamma() + " TIME:" + (fim - ini), "SVM" + iD);
 
-        ResultadoSVM resultadoSVM = new ResultadoSVM();
 
         double real = test.instance(0).classValue();
         double predict = 0;
@@ -84,17 +83,13 @@ public class WekaSVM implements Runnable {
         }
 
         //Valor real
-        resultadoSVM.setReal(real);
+        parametrosSVM.setReal(real);
         //Valor predito
-        resultadoSVM.setPredict(predict);
+        parametrosSVM.setPredict(predict);
         //Percentual de acerto
-        resultadoSVM.setPercentualAcerto(real, predict);
+        parametrosSVM.setPercentualAcerto(real, predict);
         //Diferença em módulo
-        resultadoSVM.setDiffMod(real, predict);
-
-        //Insere os parâmetros no manipulador de resultado
-        ManipuladorResultadoSVM.getInstance().putResultado(iD, resultadoSVM);
-
+        parametrosSVM.setDiffMod(real, predict);
         //Atualiza os parâmetros com o custo e o gamma utilizado
         parametrosSVM.setCost(svm.getCost());
         parametrosSVM.setGamma(svm.getGamma());

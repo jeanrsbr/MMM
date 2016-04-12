@@ -15,14 +15,11 @@ import MMM.ARFF.GeraArquivoARFFException;
 import MMM.ARFF.GeraArquivoARFF;
 import MMM.ARFF.PARAMETROS.IndicadoresException;
 import MMM.ARFF.PARAMETROS.NomeParametrosException;
-import MMM.MISC.ClientFTP;
 import MMM.MISC.ClienteFTPException;
 import MMM.SVM.ParametroSVMException;
 import MMM.SVM.SVMExecutor;
 import MMM.SVM.SVMExecutorException;
 import MMM.SVM.WekaSVMException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -110,7 +107,7 @@ public class Main {
 
     private static void executaSVM() throws GeraArquivoARFFException, ImportadorException, InsereParametrosException,
             BaixaArquivoException, IndicadoresException, NomeParametrosException, SVMExecutorException, WekaSVMException,
-            ParametroSVMException {
+            ParametroSVMException, FileNotFoundException {
         //Obtém a lista de ativos que devem ser importados
         String[] ativos = LeituraProperties.getInstance().leituraProperties("prop.ativos").split("#");
 
@@ -126,6 +123,9 @@ public class Main {
                 atiPaises[0] = ativos[i];
             }
 
+            //Direciona arquivo de LOG com o nome do ativo
+            Log.buffAtivo(atiPaises[0]);
+            
             //Criar arquivo ARFF
             Log.loga("Será gerado o arquivo ARFF", "ARFF");
             //Instância a geração de arquivos ARFF
@@ -142,8 +142,17 @@ public class Main {
     }
 
     private static void executaAnalisador() throws ClienteFTPException {
-        ClientFTP ftp = new ClientFTP();
-        ftp.receiveFile();
+        
+        
+                try {
+
+
+        } catch (Exception ex) {
+            Log.loga(ex.getMessage());
+            ex.printStackTrace();            
+        }
+        
+               
     }
 
 }
