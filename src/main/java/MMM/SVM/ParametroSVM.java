@@ -12,10 +12,11 @@ import weka.classifiers.meta.GridSearch;
  *
  * @author Jean-NoteI5
  */
-public class ParametroSVM {
+public class ParametroSVM implements Cloneable {
 
     //PARAMETROS INICIAS
-    private final int diaInicial; // Dia inicial para treino do conjunto (De trás para frente)
+    private final String nomeAtivo;
+    private int diaInicial; // Dia inicial para treino do conjunto (De trás para frente)
     private final int tamanhoDoConjunto; // Tamanho do conjunto de treino
     private final int gridSearchEvaluation; //Tipo de avaliação do GridSearch
     private final int kernel; //Kernel que será utilizado na SVM
@@ -26,18 +27,19 @@ public class ParametroSVM {
     private double cost;
 
     //RESULTADOS OBTIDOS ATRAVÉS DE SVM    
+    private double realAnterior; //Valor do dia anterior, para comparar no analisador
     private double real;
     private double predict;
     private double diffMod;
     private double percentualAcerto;
 
-    public ParametroSVM(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
+    public ParametroSVM(String nomeAtivo, int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
+        this.nomeAtivo = nomeAtivo;
         this.diaInicial = diaInicial;
         this.tamanhoDoConjunto = tamanhoDoConjunto;
         this.gridSearchEvaluation = gridSearchEvaluation;
         this.kernel = kernel;
         this.type = type;
-
     }
 
     public double getGamma() {
@@ -76,6 +78,13 @@ public class ParametroSVM {
         return type;
     }
 
+    public void setDiaInicial(int diaInicial) {
+        this.diaInicial = diaInicial;
+    }
+
+    
+    
+    
     public String getGridSearchEvaluationAlfa() throws ParametroSVMException {
 
         switch (gridSearchEvaluation) {
@@ -159,14 +168,24 @@ public class ParametroSVM {
         }
     }
 
+    public double getRealAnterior() {
+        return realAnterior;
+    }
+
+    public void setRealAnterior(double realAnterior) {
+        this.realAnterior = realAnterior;
+    }
+
     //Monta o cabeçalho da classe
     public String montaCabecalho() {
-        return "dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real;valor_predito;diffMod;perc_acerto";
+        return "ativo;dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto";
     }
 
     public String montaLinha() throws ParametroSVMException {
         StringBuilder linha = new StringBuilder();
 
+        linha.append(nomeAtivo);
+        linha.append(";");
         linha.append(diaInicial);
         linha.append(";");
         linha.append(EditaValores.editaVirgula(cost));
@@ -187,6 +206,8 @@ public class ParametroSVM {
         linha.append(";");
         linha.append(getTypeAlfa());
         linha.append(";");
+        linha.append(EditaValores.edita2DecVirgula(realAnterior));
+        linha.append(";");
         linha.append(EditaValores.edita2DecVirgula(real));
         linha.append(";");
         linha.append(EditaValores.edita2DecVirgula(predict));
@@ -199,15 +220,53 @@ public class ParametroSVM {
 
     }
     
-    //Obtém ID único dos parâmetros da máquina de vetor de suporte
-    public long getId(){
+    //Criar parametroSVM através da linha do CSV
+    public static ParametroSVM desmontaLinha(String linha) throws ParametroSVMException{
         
+        //Obtém a linha desmontada
+        String[] linhaDesmontada = linha.split(";");
+        String nomeAtivoCSV = linhaDesmontada[0];
+        int diaInicialCSV = Integer.parseInt(linhaDesmontada[1]);
+        double costCSV = Double.parseDouble(linhaDesmontada[2]);
+        double gammaCSV = Double.parseDouble(linhaDesmontada[3]);
+        int tamanhoDoConjuntoCSV = Integer.parseInt(linhaDesmontada[4]);
+        int gridSearchEvaluationCSV = Integer.parseInt(linhaDesmontada[5]);
+        //linha.append(getGridSearchEvaluationAlfa());
+        int kernelCSV = Integer.parseInt(linhaDesmontada[7]);
+        //linha.append(getKernelAlfa());
+        int typeCSV = Integer.parseInt(linhaDesmontada[9]);
+        //linha.append(getTypeAlfa());
+        double realAnteriorCSV = Double.parseDouble(linhaDesmontada[11]);
+        double realCSV = Double.parseDouble(linhaDesmontada[12]);
+        double predictCSV = Double.parseDouble(linhaDesmontada[13]); 
+        double diffModCSV = Double.parseDouble(linhaDesmontada[14]);
+        double percentualAcertoCSV = Double.parseDouble(linhaDesmontada[15]);
+
+        //Monta o parâmetro de acordo com o CSV
+        ParametroSVM parametroSVM = new ParametroSVM(nomeAtivoCSV, diaInicialCSV, tamanhoDoConjuntoCSV, gridSearchEvaluationCSV, kernelCSV, typeCSV);
+        parametroSVM.setCost(costCSV);
+        parametroSVM.setGamma(gammaCSV);
+        parametroSVM.setRealAnterior(realAnteriorCSV);
+        parametroSVM.setReal(realCSV);
+        parametroSVM.setPredict(predictCSV);
+        parametroSVM.setPercentualAcerto(realCSV, predictCSV);
+        parametroSVM.setDiffMod(realCSV, predictCSV);
+        
+        return parametroSVM;
+    }
+
+    //Obtém ID único dos parâmetros da máquina de vetor de suporte
+    public long getId() {
+
         long tamGoedel = 2 * tamanhoDoConjunto;
         long gridSearchGoedel = 3 * gridSearchEvaluation;
         long kernelGoedel = 5 * kernel;
         long typeGoedel = 7 * type;
-        
+
         return tamGoedel * gridSearchGoedel * kernelGoedel * typeGoedel;
-    } 
-    
+    }
+
+    public ParametroSVM clone() throws CloneNotSupportedException {
+        return (ParametroSVM) super.clone();
+    }
 }

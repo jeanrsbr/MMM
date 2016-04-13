@@ -4,19 +4,25 @@
  */
 package MMM.ANALISADOR;
 
-import MMM.SVM.ManipuladorParSVM;
+import MMM.SVM.ManipuladorParametroSVM;
 import MMM.SVM.ParametroSVM;
+import eu.verdelhan.ta4j.Tick;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import org.joda.time.DateTime;
 
 /**
  * Descrição da classe.
  */
 public class Analisador {
 
-    String nomArq;
-    ManipuladorParSVM parametros;
+    String nomArqCSV;
+    ManipuladorParametroSVM parametros;
     
     
     
@@ -37,13 +43,48 @@ public class Analisador {
     //Chamar a SVM
     //Retornar resultados em um objeto
 
-    public Analisador() {
+    
+    
+    public void analisa(){
+        
+        
         
     }
     
     
+    //Carrega dados do arquivo CSV
+    private ManipuladorParametroSVM carregaCSV() {
+        
+        
+//        try {
+//        //Abre arquivo CSV
+//        BufferedReader br = new BufferedReader(new FileReader(nomArqCSV));
+//        
+//           //Descarta a primeira linha
+//            br.readLine();
+//
+//            //Varre o arquivo
+//            while (true) {
+//                String linha = br.readLine();
+//
+//                if (linha == null) {
+//                    break;
+//                }
+//                
+//                parametros.ParametroSVM.desmontaLinha(linha);
+//            }
+//        
+//        } catch (Exception ex){
+//            throw AnalisadorException("Não foi possível importar o arquivo CSV para análise");
+//        }
+//        
+        
+    return null;
+    }
+    
+    
     //Verifica qual a melhor combinação de resultados do algoritmo
-    public int processaMelhor(){
+    private ParametroSVM encontraMelhoresParametros() throws AnalisadorException, CloneNotSupportedException{
         
 
         //Monta HASH MAP para agrupar os resultados dos parâmetros repetidos
@@ -73,16 +114,24 @@ public class Analisador {
             }            
         }
 
+        ParametroSVM parametroRetorno = null;
+        
         //Varre os parâmetro obtidos
         for (int i = 0; i < parametros.size(); i++) {
             //Se o parâmetro possui o mesmo ID do menor e for o último dia analisado
             if (parametros.get(i).getId() == iD && parametros.get(i).getDiaInicial() == 2){
-                return i;
+                parametroRetorno = parametros.get(i).clone();
             }
         }        
         
-        return -1;
+        if (parametroRetorno == null){
+            throw new AnalisadorException("Não foi possível encontrar o melhor parâmetro");
+        }
         
+        //Indica que processará o primeiro dia da série
+        parametroRetorno.setDiaInicial(1);        
+        
+        return parametroRetorno;       
     }
         
 }

@@ -31,7 +31,7 @@ public class SVMExecutor {
 
         try {
 
-            ManipuladorParSVM manipuladorParametroSVM = new ManipuladorParSVM();
+            ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM(getName());
             manipuladorParametroSVM.populaAnalise();
             ArrayList<ParametroSVM> analise = manipuladorParametroSVM.getParametroSVM();
 
@@ -39,7 +39,7 @@ public class SVMExecutor {
             for (int i = 0; i < analise.size(); i++) {
 
                 //THREAD
-                new Thread(new WekaSVM(nomArqARFF, analise.get(i), i)).start();
+                new Thread(new WekaSVM(nomArqARFF, analise.get(i))).start();
 
 //                //SEM THREAD
 //                WekaSVM bambu = new WekaSVM(nomArqARFF, analise.get(i), i);
@@ -74,6 +74,16 @@ public class SVMExecutor {
         }
 
     }
+    
+    //Executa a SVM para uma única configuração
+    public ParametroSVM executaAnalise(ParametroSVM in) throws WekaSVMException, ParametroSVMException{
+        WekaSVM analise = new WekaSVM(nomArqARFF, in);
+        analise.perfomanceAnalysis();
+        //Retorna o objeto com o resultado da análise
+        return in;
+               
+    }
+    
 
     private void criaCSV(ArrayList<ParametroSVM> analise) throws SVMExecutorException, WekaSVMException,
             ParametroSVMException {
@@ -86,13 +96,13 @@ public class SVMExecutor {
             BufferedWriter resultado = new BufferedWriter(strWriter);
 
             //Cabeçalho
-            resultado.write("ativo;" + analise.get(0).montaCabecalho());
+            resultado.write(analise.get(0).montaCabecalho());
             resultado.newLine();
 
             Log.loga("Iniciando exportação do arquivo CSV", "SVM");
             //Varre as opções de análise
             for (int i = 0; i < analise.size(); i++) {
-                resultado.write(montaLinha(analise.get(i)));
+                resultado.write(analise.get(i).montaLinha());
                 resultado.newLine();
             }
             resultado.flush();
@@ -103,19 +113,6 @@ public class SVMExecutor {
 
     }
 
-    private String montaLinha(ParametroSVM parametroSVM) throws WekaSVMException,
-            ParametroSVMException {
-
-        StringBuilder linha = new StringBuilder();
-
-        linha.append(getName());
-        linha.append(";");
-        linha.append(parametroSVM.montaLinha());
-
-        //Retorna a linha montada
-        return linha.toString();
-
-    }
 
     //Retorna o nome do arquivo
     private String getName() {

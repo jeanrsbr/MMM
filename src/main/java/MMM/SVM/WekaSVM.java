@@ -30,13 +30,11 @@ public class WekaSVM implements Runnable {
 
     private Instances dataSet;
     private ParametroSVM parametrosSVM;
-    private int iD; //Id de identificação dos parâmetros e resultados
     private int exception = 0;
 
-    public WekaSVM(String arqARFF, ParametroSVM parametrosSVM, int iD) throws WekaSVMException {
+    public WekaSVM(String arqARFF, ParametroSVM parametrosSVM) throws WekaSVMException {
         dataSet = buildBase(arqARFF);
         this.parametrosSVM = parametrosSVM;
-        this.iD = iD;
     }
 
     //Realiza o teste de performance do modelo construído
@@ -55,7 +53,10 @@ public class WekaSVM implements Runnable {
 
         train.setClassIndex(train.numAttributes() - 1);
         test.setClassIndex(test.numAttributes() - 1);
-
+        
+        //Seta o valor do dia anterior
+        parametrosSVM.setRealAnterior(train.instance(train.numInstances() - 1).classValue());
+        
         LibSVM svm = buildSVM();
         svm = GridSearch(svm, train);
         constroiClassificador(svm, train);
@@ -64,7 +65,7 @@ public class WekaSVM implements Runnable {
 
         Log.loga("EVALUATION:" + parametrosSVM.getGridSearchEvaluationAlfa() + " KERNEL:" + parametrosSVM.
                 getKernelAlfa() + " TYPE:" + parametrosSVM.getTypeAlfa() + " COST:" + svm.getCost() + " gamma:" +
-                svm.getGamma() + " TIME:" + (fim - ini), "SVM" + iD);
+                svm.getGamma() + " TIME:" + (fim - ini));
 
 
         double real = test.instance(0).classValue();

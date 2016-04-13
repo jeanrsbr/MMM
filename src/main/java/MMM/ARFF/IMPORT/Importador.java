@@ -4,14 +4,11 @@
  */
 package MMM.ARFF.IMPORT;
 
-import MMM.ARFF.IMPORT.BaixaArquivoException;
-import MMM.ARFF.IMPORT.BaixaArquivo;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TimeSeries;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

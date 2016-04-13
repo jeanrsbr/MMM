@@ -12,14 +12,16 @@ import weka.classifiers.meta.GridSearch;
 /**
  * Descrição da classe.
  */
-public class ManipuladorParSVM {
+public class ManipuladorParametroSVM {
 
     private final ArrayList<ParametroSVM> parametroSVM;
     private final int diasConjuntoTeste;
     private final int tamConjuntoIni;
     private final int tamConjuntoFin;
+    private final String nomeAtivo;
 
-    public ManipuladorParSVM() {
+    public ManipuladorParametroSVM(String nomeAtivo) {
+        this.nomeAtivo = nomeAtivo;
         this.diasConjuntoTeste = Integer.parseInt(LeituraProperties.getInstance().
                 leituraProperties("svm.diasconjuntoteste"));
         this.parametroSVM = new ArrayList<>();
@@ -28,6 +30,11 @@ public class ManipuladorParSVM {
 
     }
 
+    //Inclui ocorrência de parâmetro
+    public void addParametro(ParametroSVM par){
+        parametroSVM.add(par);        
+    }
+    
     public ArrayList<ParametroSVM> getParametroSVM() {
         return parametroSVM;
     }
@@ -73,7 +80,7 @@ public class ManipuladorParSVM {
     }
 
     private void gravaParametro(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
-        parametroSVM.add(new ParametroSVM(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, kernel, type));
+        parametroSVM.add(new ParametroSVM(nomeAtivo, diaInicial, tamanhoDoConjunto, gridSearchEvaluation, kernel, type));
     }
 
 }
