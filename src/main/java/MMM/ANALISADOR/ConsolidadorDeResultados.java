@@ -8,7 +8,10 @@ package MMM.ANALISADOR;
 import MMM.MISC.ClientFTP;
 import MMM.MISC.ClienteFTPException;
 import MMM.MISC.LeituraProperties;
+import MMM.MISC.Log;
 import com.sun.security.ntlm.Client;
+import java.io.File;
+import java.util.ArrayList;
 
 /**
  *
@@ -16,16 +19,10 @@ import com.sun.security.ntlm.Client;
  */
 public class ConsolidadorDeResultados {
 
-    private final static String ARFF_DIR = "ARFF";
-    private final static String RESULTADO_DIR = "resultado";
+    private final static String ARFF_DIR = "ARFF/";
+    private final static String RESULTADO_DIR = "resultado/";
     private boolean usaFTP;
-
-    //Verificar quantos ativos serão analisados (PROPERTIES)
-    //Baixar os arquivos CSV do FTP ou pegar os arquivos da base local
-    //Baixar os arquivos ARFF do FTP ou pegar os arquivos da base local
-    //Sugerir compra de quais ativos
-    //Para o TCC precisa comparar a sugestão com o valor efetivo para verificar se houve lucro ou prejuízo (Talvez isso deve ser em outra CLASSE)
-    //Sugere a compra e venda em arquivo CSV?
+    
     public ConsolidadorDeResultados() {
         //Indica que usa FTP
         usaFTP = true;
@@ -33,37 +30,93 @@ public class ConsolidadorDeResultados {
         if (Integer.parseInt(LeituraProperties.getInstance().leituraProperties("ftp.ftp")) == 0) {
             usaFTP = false;
         }
+        
     }
 
     //Realiza a consolidação de resultados e sugere qual ativo deve ser comprado ou vendido
     public void sugereCompra() throws ConsolidadorDeResultadosException {
 
         try {
+            
+            
+            
+            //Valida os arquivos existentes no diretório 
+            validaArquivos();
+            
+            ArrayList<Resultado> resultados = new ArrayList<>();
+            
+            //Obtém a lista de arquivos do diretório ARFF
+            String[] listaArquivosARFF = listaArquivos(ARFF_DIR);
+            String[] listaArquivosResultado = listaArquivos(RESULTADO_DIR);
+            
+            //Varre os arquivos para análise
+            for (int i = 0; i < listaArquivosARFF.length; i++) {
 
-            //Obtém a lista de ativos que devem ser importados
-            String[] ativos = LeituraProperties.getInstance().leituraProperties("prop.ativos").split("#");
-
-            //Varre a lista de ativos a serem importados
-            for (int i = 0; i < ativos.length; i++) {
-
-                String[] atiPaises = new String[2];
-
-                if (ativos[i].contains(";")) {
-                    //Obtém os ativos de cada país
-                    atiPaises = ativos[i].split(";");
-                } else {
-                    atiPaises[0] = ativos[i];
-                }
-
-                //Se deve obter os arquivos do FTP
-                if (usaFTP) {
-                    baixaArquivosFTP(ativos.length);
-                }
-
+                //Inicia analise de determinado ativo
+                Analisador analisador = new Analisador(listaArquivosResultado[i], listaArquivosARFF[i]);
+                //Inclui o resultado analisado deste ativo
+                resultados.add(analisador.analisa());
+                
             }
+            
+            
+            
+            double percentualDiffValoresAux = 0;
+            int indAux = 0;
+            
+            //Varre os resultados obtidos
+            for (int i = 0; i < resultados.size(); i++) {
+            
+                //Se preveu que o ativo vai baixar de preço
+                if (resultados.get(i).getPercentualDiffValores() <= 100){
+                    continue;
+                }
+                
+                //Se houve um aumento exagerado, presume que o algoritmo loquetiou
+                if (resultados.get(i).getPercentualDiffValores() > 150)
+                
+                //Se o registro atual processado, possui uma diferença maior que o registro anterior
+                if (resultados.get(i).getPercentualDiffValores() > percentualDiffValoresAux){
+                    percentualDiffValoresAux = resultados.get(i).getPercentualDiffValores();
+                    indAux = i;
+                    
+                }
+                
+            }
+            
+            //Indica ao usuário quais dos ativos devem ser investidos
+            Log.loga("Invista no ativo: " + resultados.get(indAux).getAtivo(), "ANALISE");
 
         } catch (Exception ex) {
             throw new ConsolidadorDeResultadosException("Houve um erro no momento de consolidar os resultados");
+        }
+    }
+    
+    //Retorna a lista de arquivos existentes no diretório
+    private String[] listaArquivos(String name){
+        File aRFF = new File(name);
+        return aRFF.list();
+        
+    }
+
+    private void validaArquivos() throws ClienteFTPException, InterruptedException, ConsolidadorDeResultadosException {
+
+        //Obtém a lista de ativos que devem ser importados
+        String[] ativos = LeituraProperties.getInstance().leituraProperties("prop.ativos").split("#");
+
+        //Se deve obter os arquivos do FTP
+        if (usaFTP) {
+            baixaArquivosFTP(ativos.length);
+        }
+
+        //Verifica se possui todos os arquivos ARFF necessários
+        if (listaArquivos(ARFF_DIR).length != ativos.length){
+            throw new ConsolidadorDeResultadosException("A quantidade de arquivos ARFF não é igual a quantidade de ativos indicados para importação");
+        }
+
+        //Verifica se possui todos os arquivos de resultado necessários
+        if (listaArquivos(RESULTADO_DIR).length != ativos.length){
+            throw new ConsolidadorDeResultadosException("A quantidade de arquivos de resultado não é igual a quantidade de ativos indicados para importação");
         }
     }
 

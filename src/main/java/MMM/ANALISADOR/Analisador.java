@@ -22,9 +22,14 @@ import java.util.Set;
  */
 public class Analisador {
 
-    private String nomArqCSV;
-    private String nomArqARFF;
+    private final String nomArqCSV;
+    private final String nomArqARFF;
 
+    public Analisador(String nomArqCSV, String nomArqARFF) {
+        this.nomArqCSV = nomArqCSV;
+        this.nomArqARFF = nomArqARFF;
+    }
+    
     public Resultado analisa() throws AnalisadorException {
 
         try {

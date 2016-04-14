@@ -98,7 +98,7 @@ public class ClientFTP {
             //Indica arquivo do tipo ASCII
             ftp.setFileType(FTPClient.ASCII_FILE_TYPE);
 
-            ftp.changeWorkingDirectory(folderserver + folder + "/");
+            ftp.changeWorkingDirectory(folderserver + folder);
 
             //Obtém a lista de arquivos no FTP
             String[] lista = ftp.listNames();
@@ -121,7 +121,7 @@ public class ClientFTP {
             //Indica arquivo do tipo ASCII
             ftp.setFileType(FTPClient.ASCII_FILE_TYPE);
 
-            ftp.changeWorkingDirectory(folderserver + folder + "/");
+            ftp.changeWorkingDirectory(folderserver + folder);
 
             //Obtém a lista de arquivos no FTP
             String[] lista = ftp.listNames();
@@ -135,9 +135,11 @@ public class ClientFTP {
             for (int i = 0; i < lista.length; i++) {
                 FileOutputStream fos;
                 //Cria o arquivo que será baixado(Na pasta indicada)
-                fos = new FileOutputStream(folderlocal + folder + "/" + lista[i]);
+                fos = new FileOutputStream(folderlocal + folder + lista[i]);
                 //Descarrega o arquivo na pasta corrente
                 ftp.retrieveFile(lista[i], fos);
+                //Exclui o arquivo da pasta do FTP
+                ftp.deleteFile(lista[i]);
             }
 
             disconnectFTP(ftp);
