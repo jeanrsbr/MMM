@@ -25,7 +25,7 @@ public class ParametroSVM implements Cloneable {
     private double gamma;
     private double cost;
 
-    //RESULTADOS OBTIDOS ATRAVÉS DE SVM    
+    //RESULTADOS OBTIDOS ATRAVÉS DE SVM
     private double realAnterior; //Valor do dia anterior, para comparar no analisador
     private double real;
     private double predict;
@@ -80,9 +80,9 @@ public class ParametroSVM implements Cloneable {
         this.diaInicial = diaInicial;
     }
 
-    
-    
-    
+
+
+
     public String getGridSearchEvaluationAlfa() throws ParametroSVMException {
 
         switch (gridSearchEvaluation) {
@@ -215,27 +215,27 @@ public class ParametroSVM implements Cloneable {
         return linha.toString();
 
     }
-    
+
     //Criar parametroSVM através da linha do CSV
     public static ParametroSVM desmontaLinha(String linha) throws ParametroSVMException{
-        
+
         //Obtém a linha desmontada
         String[] linhaDesmontada = linha.split(";");
-        int diaInicialCSV = Integer.parseInt(linhaDesmontada[1]);
-        double costCSV = Double.parseDouble(linhaDesmontada[2]);
-        double gammaCSV = Double.parseDouble(linhaDesmontada[3]);
-        int tamanhoDoConjuntoCSV = Integer.parseInt(linhaDesmontada[4]);
-        int gridSearchEvaluationCSV = Integer.parseInt(linhaDesmontada[5]);
+        int diaInicialCSV = Integer.parseInt(linhaDesmontada[0]);
+        double costCSV = Double.parseDouble(linhaDesmontada[1].replaceAll(",", "."));
+        double gammaCSV = Double.parseDouble(linhaDesmontada[2].replaceAll(",", "."));
+        int tamanhoDoConjuntoCSV = Integer.parseInt(linhaDesmontada[3]);
+        int gridSearchEvaluationCSV = Integer.parseInt(linhaDesmontada[4]);
         //linha.append(getGridSearchEvaluationAlfa());
-        int kernelCSV = Integer.parseInt(linhaDesmontada[7]);
+        int kernelCSV = Integer.parseInt(linhaDesmontada[6]);
         //linha.append(getKernelAlfa());
-        int typeCSV = Integer.parseInt(linhaDesmontada[9]);
+        int typeCSV = Integer.parseInt(linhaDesmontada[8]);
         //linha.append(getTypeAlfa());
-        double realAnteriorCSV = Double.parseDouble(linhaDesmontada[11]);
-        double realCSV = Double.parseDouble(linhaDesmontada[12]);
-        double predictCSV = Double.parseDouble(linhaDesmontada[13]); 
-        double diffModCSV = Double.parseDouble(linhaDesmontada[14]);
-        double percentualAcertoCSV = Double.parseDouble(linhaDesmontada[15]);
+        double realAnteriorCSV = Double.parseDouble(linhaDesmontada[10].replaceAll(",", "."));
+        double realCSV = Double.parseDouble(linhaDesmontada[11].replaceAll(",", "."));
+        double predictCSV = Double.parseDouble(linhaDesmontada[12].replaceAll(",", "."));
+        double diffModCSV = Double.parseDouble(linhaDesmontada[13].replaceAll(",", "."));
+        double percentualAcertoCSV = Double.parseDouble(linhaDesmontada[14].replaceAll(",", "."));
 
         //Monta o parâmetro de acordo com o CSV
         ParametroSVM parametroSVM = new ParametroSVM(diaInicialCSV, tamanhoDoConjuntoCSV, gridSearchEvaluationCSV, kernelCSV, typeCSV);
@@ -246,7 +246,7 @@ public class ParametroSVM implements Cloneable {
         parametroSVM.setPredict(predictCSV);
         parametroSVM.setPercentualAcerto(realCSV, predictCSV);
         parametroSVM.setDiffMod(realCSV, predictCSV);
-        
+
         return parametroSVM;
     }
 

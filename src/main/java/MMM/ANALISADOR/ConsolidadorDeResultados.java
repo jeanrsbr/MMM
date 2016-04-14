@@ -9,7 +9,6 @@ import MMM.MISC.ClientFTP;
 import MMM.MISC.ClienteFTPException;
 import MMM.MISC.LeituraProperties;
 import MMM.MISC.Log;
-import com.sun.security.ntlm.Client;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -22,7 +21,7 @@ public class ConsolidadorDeResultados {
     private final static String ARFF_DIR = "ARFF/";
     private final static String RESULTADO_DIR = "resultado/";
     private boolean usaFTP;
-    
+
     public ConsolidadorDeResultados() {
         //Indica que usa FTP
         usaFTP = true;
@@ -30,25 +29,25 @@ public class ConsolidadorDeResultados {
         if (Integer.parseInt(LeituraProperties.getInstance().leituraProperties("ftp.ftp")) == 0) {
             usaFTP = false;
         }
-        
+
     }
 
     //Realiza a consolidação de resultados e sugere qual ativo deve ser comprado ou vendido
     public void sugereCompra() throws ConsolidadorDeResultadosException {
 
         try {
-            
-            
-            
-            //Valida os arquivos existentes no diretório 
+
+
+
+            //Valida os arquivos existentes no diretório
             validaArquivos();
-            
+
             ArrayList<Resultado> resultados = new ArrayList<>();
-            
+
             //Obtém a lista de arquivos do diretório ARFF
             String[] listaArquivosARFF = listaArquivos(ARFF_DIR);
             String[] listaArquivosResultado = listaArquivos(RESULTADO_DIR);
-            
+
             //Varre os arquivos para análise
             for (int i = 0; i < listaArquivosARFF.length; i++) {
 
@@ -56,34 +55,34 @@ public class ConsolidadorDeResultados {
                 Analisador analisador = new Analisador(listaArquivosResultado[i], listaArquivosARFF[i]);
                 //Inclui o resultado analisado deste ativo
                 resultados.add(analisador.analisa());
-                
+
             }
-            
-            
-            
+
+
+
             double percentualDiffValoresAux = 0;
             int indAux = 0;
-            
+
             //Varre os resultados obtidos
             for (int i = 0; i < resultados.size(); i++) {
-            
+
                 //Se preveu que o ativo vai baixar de preço
                 if (resultados.get(i).getPercentualDiffValores() <= 100){
                     continue;
                 }
-                
+
                 //Se houve um aumento exagerado, presume que o algoritmo loquetiou
                 if (resultados.get(i).getPercentualDiffValores() > 150)
-                
+
                 //Se o registro atual processado, possui uma diferença maior que o registro anterior
                 if (resultados.get(i).getPercentualDiffValores() > percentualDiffValoresAux){
                     percentualDiffValoresAux = resultados.get(i).getPercentualDiffValores();
                     indAux = i;
-                    
+
                 }
-                
+
             }
-            
+
             //Indica ao usuário quais dos ativos devem ser investidos
             Log.loga("Invista no ativo: " + resultados.get(indAux).getAtivo(), "ANALISE");
 
@@ -91,12 +90,12 @@ public class ConsolidadorDeResultados {
             throw new ConsolidadorDeResultadosException("Houve um erro no momento de consolidar os resultados");
         }
     }
-    
+
     //Retorna a lista de arquivos existentes no diretório
     private String[] listaArquivos(String name){
         File aRFF = new File(name);
         return aRFF.list();
-        
+
     }
 
     private void validaArquivos() throws ClienteFTPException, InterruptedException, ConsolidadorDeResultadosException {

@@ -4,6 +4,7 @@
  */
 package MMM;
 
+import MMM.ANALISADOR.ConsolidadorDeResultados;
 import java.io.File;
 import java.io.FileNotFoundException;
 import MMM.MISC.LeituraProperties;
@@ -51,20 +52,26 @@ public class Main {
                 return;
             }
 
-            //Deleta os arquivos de resultado
-            File resultado = new File("resultado/");
-            //Verifica se existe o diretório
-            if (!resultado.isDirectory()) {
-                System.out.println("Não existe o diretório RESULTADO na pasta de execução");
-                return;
-            }
+            //Avalia o tipo de execução
+            int tipoExe = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("prop.tipoExe"));
 
-            String[] listaResultado = resultado.list();
-            for (int i = 0; i < listaResultado.length; i++) {
+            //Se for execução do SVM
+            if (tipoExe == 1) {
+                //Deleta os arquivos de resultado
+                File resultado = new File("resultado/");
+                //Verifica se existe o diretório
+                if (!resultado.isDirectory()) {
+                    System.out.println("Não existe o diretório RESULTADO na pasta de execução");
+                    return;
+                }
 
-                //Se for arquivo de resultado
-                if (listaResultado[i].endsWith(".csv")) {
-                    new File("resultado/" + listaResultado[i]).delete();
+                String[] listaResultado = resultado.list();
+                for (int i = 0; i < listaResultado.length; i++) {
+
+                    //Se for arquivo de resultado
+                    if (listaResultado[i].endsWith(".csv")) {
+                        new File("resultado/" + listaResultado[i]).delete();
+                    }
                 }
             }
 
@@ -89,9 +96,6 @@ public class Main {
 
             //Inicializa o buffer
             Log.iniBuf();
-
-            //Avalia o tipo de execução
-            int tipoExe = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("prop.tipoExe"));
 
             if (tipoExe == 1) {
                 executaSVM();
@@ -144,6 +148,9 @@ public class Main {
     private static void executaAnalisador() throws ClienteFTPException {
 
         try {
+
+            ConsolidadorDeResultados consolidadorDeResultados = new ConsolidadorDeResultados();
+            consolidadorDeResultados.sugereCompra();
 
         } catch (Exception ex) {
             Log.loga(ex.getMessage());

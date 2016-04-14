@@ -7,6 +7,7 @@ package MMM.ANALISADOR;
 import MMM.SVM.ManipuladorParametroSVM;
 import MMM.SVM.ParametroSVM;
 import MMM.SVM.ParametroSVMException;
+import MMM.SVM.SVMConstants;
 import MMM.SVM.SVMExecutor;
 import MMM.SVM.WekaSVMException;
 import java.io.BufferedReader;
@@ -22,26 +23,26 @@ import java.util.Set;
  */
 public class Analisador {
 
-    private final String nomArqCSV;
-    private final String nomArqARFF;
+    private final String arquivoResultado;
+    private final String arquivoARFF;
 
-    public Analisador(String nomArqCSV, String nomArqARFF) {
-        this.nomArqCSV = nomArqCSV;
-        this.nomArqARFF = nomArqARFF;
+    public Analisador(String arquivoResultado, String arquivoARFF) {
+        this.arquivoResultado = arquivoResultado;
+        this.arquivoARFF = arquivoARFF;
     }
-    
+
     public Resultado analisa() throws AnalisadorException {
 
         try {
             //Encontra a linha de parâmetros que obteve o melhor resultado
             ParametroSVM parametroSVM = encontraMelhoresParametros(carregaCSV());
             //Executar algoritmo SVM
-            SVMExecutor sVMAnalisador = new SVMExecutor(nomArqARFF);
+            SVMExecutor sVMAnalisador = new SVMExecutor(arquivoARFF);
             sVMAnalisador.executaAnalise(parametroSVM);
             //Incluir objeto de resultado
-            return new Resultado(nomArqARFF.split(".ARFF")[0], parametroSVM.getRealAnterior(), parametroSVM.getPredict(), 0);
-            
-            
+            return new Resultado(arquivoARFF.split(".ARFF")[0], parametroSVM.getRealAnterior(), parametroSVM.getPredict(), 0);
+
+
         } catch (IOException | ParametroSVMException | AnalisadorException | CloneNotSupportedException | WekaSVMException ex) {
             throw new AnalisadorException("Não foi possível realizar a análise do arquivo de resultados");
         }
@@ -53,7 +54,7 @@ public class Analisador {
 
         ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM();
         //Abre arquivo CSV
-        BufferedReader br = new BufferedReader(new FileReader(nomArqCSV));
+        BufferedReader br = new BufferedReader(new FileReader(SVMConstants.RESULTADO_FOLDER + arquivoResultado));
 
         //Descarta a primeira linha
         br.readLine();
