@@ -6,9 +6,6 @@ package MMM.ARFF.IMPORT;
 
 import MMM.MISC.Log;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Authenticator;
@@ -35,25 +32,6 @@ public class BaixaArquivo {
     }
 
     public BufferedReader downloadArquivo() throws BaixaArquivoException {
-
-        try {
-            //Se esta em modo teste
-            if (LeituraProperties.getInstance().leituraProperties("prop.teste").equals("1")) {
-                File file = new File("Teste//teste.csv");
-                FileInputStream arquivo = new FileInputStream(file);
-                InputStreamReader reader = new InputStreamReader(arquivo);
-                return new BufferedReader(reader);
-            } else {
-                return arquivoLink();
-            }
-        } catch (FileNotFoundException ex) {
-            throw new BaixaArquivoException("Não foi possível abrir o arquivo de teste", ex);
-        }
-
-    }
-
-    //Baixa o arquivo do Link
-    public BufferedReader arquivoLink() throws BaixaArquivoException {
 
         try {
             //Instância objeto para acesso ao URL onde encontra-se o CSV
@@ -89,7 +67,6 @@ public class BaixaArquivo {
             }
 
             return br;
-
 
         } catch (MalformedURLException ex) {
             throw new BaixaArquivoException("O Link para baixar o CSV de cotações não foi montado corretamente", ex);

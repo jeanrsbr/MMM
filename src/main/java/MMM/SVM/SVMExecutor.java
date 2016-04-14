@@ -31,7 +31,7 @@ public class SVMExecutor {
 
         try {
 
-            ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM(getName());
+            ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM();
             manipuladorParametroSVM.populaAnalise();
             ArrayList<ParametroSVM> analise = manipuladorParametroSVM.getParametroSVM();
 
@@ -90,7 +90,7 @@ public class SVMExecutor {
 
         try {
             //Abre o arquivo CSV de resultados
-            File file = new File("teste/resultado_" + getName().split(".arff")[0] + ".csv");
+            File file = new File("resultado/" + getName().split(".arff")[0] + ".csv");
             FileOutputStream arquivoGravacao = new FileOutputStream(file);
             OutputStreamWriter strWriter = new OutputStreamWriter(arquivoGravacao);
             BufferedWriter resultado = new BufferedWriter(strWriter);

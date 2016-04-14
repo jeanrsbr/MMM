@@ -15,7 +15,6 @@ import weka.classifiers.meta.GridSearch;
 public class ParametroSVM implements Cloneable {
 
     //PARAMETROS INICIAS
-    private final String nomeAtivo;
     private int diaInicial; // Dia inicial para treino do conjunto (De trás para frente)
     private final int tamanhoDoConjunto; // Tamanho do conjunto de treino
     private final int gridSearchEvaluation; //Tipo de avaliação do GridSearch
@@ -33,8 +32,7 @@ public class ParametroSVM implements Cloneable {
     private double diffMod;
     private double percentualAcerto;
 
-    public ParametroSVM(String nomeAtivo, int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
-        this.nomeAtivo = nomeAtivo;
+    public ParametroSVM(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
         this.diaInicial = diaInicial;
         this.tamanhoDoConjunto = tamanhoDoConjunto;
         this.gridSearchEvaluation = gridSearchEvaluation;
@@ -184,8 +182,6 @@ public class ParametroSVM implements Cloneable {
     public String montaLinha() throws ParametroSVMException {
         StringBuilder linha = new StringBuilder();
 
-        linha.append(nomeAtivo);
-        linha.append(";");
         linha.append(diaInicial);
         linha.append(";");
         linha.append(EditaValores.editaVirgula(cost));
@@ -225,7 +221,6 @@ public class ParametroSVM implements Cloneable {
         
         //Obtém a linha desmontada
         String[] linhaDesmontada = linha.split(";");
-        String nomeAtivoCSV = linhaDesmontada[0];
         int diaInicialCSV = Integer.parseInt(linhaDesmontada[1]);
         double costCSV = Double.parseDouble(linhaDesmontada[2]);
         double gammaCSV = Double.parseDouble(linhaDesmontada[3]);
@@ -243,7 +238,7 @@ public class ParametroSVM implements Cloneable {
         double percentualAcertoCSV = Double.parseDouble(linhaDesmontada[15]);
 
         //Monta o parâmetro de acordo com o CSV
-        ParametroSVM parametroSVM = new ParametroSVM(nomeAtivoCSV, diaInicialCSV, tamanhoDoConjuntoCSV, gridSearchEvaluationCSV, kernelCSV, typeCSV);
+        ParametroSVM parametroSVM = new ParametroSVM(diaInicialCSV, tamanhoDoConjuntoCSV, gridSearchEvaluationCSV, kernelCSV, typeCSV);
         parametroSVM.setCost(costCSV);
         parametroSVM.setGamma(gammaCSV);
         parametroSVM.setRealAnterior(realAnteriorCSV);

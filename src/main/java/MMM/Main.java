@@ -52,10 +52,10 @@ public class Main {
             }
 
             //Deleta os arquivos de resultado
-            File resultado = new File("teste/");
+            File resultado = new File("resultado/");
             //Verifica se existe o diretório
             if (!resultado.isDirectory()) {
-                System.out.println("Não existe o diretório TESTE na pasta de execução");
+                System.out.println("Não existe o diretório RESULTADO na pasta de execução");
                 return;
             }
 
@@ -63,16 +63,16 @@ public class Main {
             for (int i = 0; i < listaResultado.length; i++) {
 
                 //Se for arquivo de resultado
-                if (listaResultado[i].endsWith(".csv") && listaResultado[i].startsWith("resultado_")) {
-                    new File("teste/" + listaResultado[i]).delete();
+                if (listaResultado[i].endsWith(".csv")) {
+                    new File("resultado/" + listaResultado[i]).delete();
                 }
             }
 
             //Deleta os arquivos de LOG
-            File log = new File("logs/");
+            File log = new File("c:/temp/");
 
             if (!log.isDirectory()) {
-                System.out.println("Não existe o diretório LOGS na pasta de execução");
+                System.out.println("Não existe o diretório temporário na pasta de execução! C:/temp");
                 return;
             }
             String[] listaLog = log.list();
@@ -82,7 +82,7 @@ public class Main {
                 for (int i = 0; i < listaLog.length; i++) {
                     //Se for arquivo de resultado
                     if (listaLog[i].endsWith(".txt") && listaLog[i].startsWith("output_")) {
-                        new File("logs/" + listaLog[i]).delete();
+                        new File("c:/temp/" + listaLog[i]).delete();
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class Main {
 
             //Direciona arquivo de LOG com o nome do ativo
             Log.buffAtivo(atiPaises[0]);
-            
+
             //Criar arquivo ARFF
             Log.loga("Será gerado o arquivo ARFF", "ARFF");
             //Instância a geração de arquivos ARFF
@@ -142,17 +142,14 @@ public class Main {
     }
 
     private static void executaAnalisador() throws ClienteFTPException {
-        
-        
-                try {
 
+        try {
 
         } catch (Exception ex) {
             Log.loga(ex.getMessage());
-            ex.printStackTrace();            
+            ex.printStackTrace();
         }
-        
-               
+
     }
 
 }

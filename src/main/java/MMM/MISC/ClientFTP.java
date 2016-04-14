@@ -10,11 +10,11 @@ import org.apache.commons.net.ftp.FTPClient;
 
 public class ClientFTP {
 
-    private String endFTP;
-    private String usuario;
-    private String senha;
-    private String folderserver;
-    private String folderlocal;
+    private final String endFTP;
+    private final String usuario;
+    private final String senha;
+    private final String folderserver;
+    private final String folderlocal;
 
     public ClientFTP() {
         this.endFTP = LeituraProperties.getInstance().leituraProperties("ftp.hostname");
@@ -89,16 +89,39 @@ public class ClientFTP {
             throw new ClienteFTPException("Não foi possível enviar o arquivo para o FTP");
         }
     }
+    
+    //Verifica a quantidade de arquivos na pasta do FTP
+    public int checkListFile(String folder) throws ClienteFTPException {
+        try {
+            FTPClient ftp;
+            ftp = connectFTP();
+            //Indica arquivo do tipo ASCII
+            ftp.setFileType(FTPClient.ASCII_FILE_TYPE);
+
+            ftp.changeWorkingDirectory(folderserver + folder + "/");
+
+            //Obtém a lista de arquivos no FTP
+            String[] lista = ftp.listNames();
+            
+            int qtdArquivos = lista.length;
+            qtdArquivos = qtdArquivos - 2; // Retira o "." e  ".." que não contam como arquivos
+            
+            return qtdArquivos;
+        } catch (ClienteFTPException | IOException ex){
+            throw new ClienteFTPException("Não foi possível obter a quantidade de arquivos que estão no FTP");
+        }
+    }
 
     //Recebe o arquivo do servidor de FTP(Nome do arquivo)
-    public void receiveFile() throws ClienteFTPException {
+    public void receiveFile(String folder) throws ClienteFTPException {
 
         try {
             FTPClient ftp;
             ftp = connectFTP();
             //Indica arquivo do tipo ASCII
             ftp.setFileType(FTPClient.ASCII_FILE_TYPE);
-            ftp.changeWorkingDirectory(folderserver);
+
+            ftp.changeWorkingDirectory(folderserver + folder + "/");
 
             //Obtém a lista de arquivos no FTP
             String[] lista = ftp.listNames();
@@ -110,15 +133,11 @@ public class ClientFTP {
 
             //Varre a lista de arquivos
             for (int i = 0; i < lista.length; i++) {
-
-                //Se for arquivo CSV
-                if (lista[i].endsWith(".csv")) {
-                    FileOutputStream fos;
-                    //Cria o arquivo que será baixado(Na pasta indicada)
-                    fos = new FileOutputStream(folderlocal + lista[i]);
-                    //Descarrega o arquivo na pasta corrente
-                    ftp.retrieveFile(lista[i], fos);
-                }
+                FileOutputStream fos;
+                //Cria o arquivo que será baixado(Na pasta indicada)
+                fos = new FileOutputStream(folderlocal + folder + "/" + lista[i]);
+                //Descarrega o arquivo na pasta corrente
+                ftp.retrieveFile(lista[i], fos);
             }
 
             disconnectFTP(ftp);

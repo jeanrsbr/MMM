@@ -18,10 +18,8 @@ public class ManipuladorParametroSVM {
     private final int diasConjuntoTeste;
     private final int tamConjuntoIni;
     private final int tamConjuntoFin;
-    private final String nomeAtivo;
 
-    public ManipuladorParametroSVM(String nomeAtivo) {
-        this.nomeAtivo = nomeAtivo;
+    public ManipuladorParametroSVM() {
         this.diasConjuntoTeste = Integer.parseInt(LeituraProperties.getInstance().
                 leituraProperties("svm.diasconjuntoteste"));
         this.parametroSVM = new ArrayList<>();
@@ -80,7 +78,7 @@ public class ManipuladorParametroSVM {
     }
 
     private void gravaParametro(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
-        parametroSVM.add(new ParametroSVM(nomeAtivo, diaInicial, tamanhoDoConjunto, gridSearchEvaluation, kernel, type));
+        parametroSVM.add(new ParametroSVM(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, kernel, type));
     }
 
 }
