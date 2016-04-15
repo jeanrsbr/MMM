@@ -5,6 +5,7 @@
 package MMM;
 
 import MMM.ANALISADOR.ConsolidadorDeResultados;
+import MMM.ARFF.ARFFConstants;
 import java.io.File;
 import java.io.FileNotFoundException;
 import MMM.MISC.LeituraProperties;
@@ -18,6 +19,7 @@ import MMM.ARFF.PARAMETROS.IndicadoresException;
 import MMM.ARFF.PARAMETROS.NomeParametrosException;
 import MMM.MISC.ClienteFTPException;
 import MMM.SVM.ParametroSVMException;
+import MMM.SVM.SVMConstants;
 import MMM.SVM.SVMExecutor;
 import MMM.SVM.SVMExecutorException;
 import MMM.SVM.WekaSVMException;
@@ -57,8 +59,28 @@ public class Main {
 
             //Se for execução do SVM
             if (tipoExe == 1) {
+                
+                //Deleta os arquivos de ARFF
+                File aRFF = new File(ARFFConstants.ARFF_FOLDER);
+                //Verifica se existe o diretório
+                if (!aRFF.isDirectory()) {
+                    System.out.println("Não existe o diretório ARFF na pasta de execução");
+                    return;
+                }
+
+                String[] listaARFF = aRFF.list();
+                for (int i = 0; i < listaARFF.length; i++) {
+
+                    //Se for arquivo de resultado
+                    if (listaARFF[i].endsWith(".ARFF")) {
+                        new File(ARFFConstants.ARFF_FOLDER + listaARFF[i]).delete();
+                    }
+                }
+                
+                
+                
                 //Deleta os arquivos de resultado
-                File resultado = new File("resultado/");
+                File resultado = new File(SVMConstants.RESULTADO_FOLDER);
                 //Verifica se existe o diretório
                 if (!resultado.isDirectory()) {
                     System.out.println("Não existe o diretório RESULTADO na pasta de execução");
@@ -70,7 +92,7 @@ public class Main {
 
                     //Se for arquivo de resultado
                     if (listaResultado[i].endsWith(".csv")) {
-                        new File("resultado/" + listaResultado[i]).delete();
+                        new File(SVMConstants.RESULTADO_FOLDER + listaResultado[i]).delete();
                     }
                 }
             }

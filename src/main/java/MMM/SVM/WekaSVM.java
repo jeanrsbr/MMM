@@ -28,8 +28,8 @@ import weka.core.SelectedTag;
  */
 public class WekaSVM implements Runnable {
 
-    private Instances dataSet;
-    private ParametroSVM parametrosSVM;
+    private final Instances dataSet;
+    private final ParametroSVM parametrosSVM;
     private int exception = 0;
 
     public WekaSVM(String arqARFF, ParametroSVM parametrosSVM) throws WekaSVMException {
@@ -53,20 +53,25 @@ public class WekaSVM implements Runnable {
 
         train.setClassIndex(train.numAttributes() - 1);
         test.setClassIndex(test.numAttributes() - 1);
-        
+
         //Seta o valor do dia anterior
         parametrosSVM.setRealAnterior(train.instance(train.numInstances() - 1).classValue());
-        
+
         LibSVM svm = buildSVM();
-        svm = GridSearch(svm, train);
+
+        //Se já possui os parâmetros de COST e GAMMA inicializados
+        if (parametrosSVM.getCost() == parametrosSVM.getCostDefault()
+                && parametrosSVM.getGamma() == parametrosSVM.getGammaDefault()) {
+            svm = GridSearch(svm, train);
+        }
+
         constroiClassificador(svm, train);
 
         long fim = System.currentTimeMillis();
 
         Log.loga("EVALUATION:" + parametrosSVM.getGridSearchEvaluationAlfa() + " KERNEL:" + parametrosSVM.
-                getKernelAlfa() + " TYPE:" + parametrosSVM.getTypeAlfa() + " COST:" + svm.getCost() + " gamma:" +
-                svm.getGamma() + " TIME:" + (fim - ini));
-
+                getKernelAlfa() + " TYPE:" + parametrosSVM.getTypeAlfa() + " COST:" + svm.getCost() + " gamma:"
+                + svm.getGamma() + " TIME:" + (fim - ini));
 
         double real = test.instance(0).classValue();
         double predict = 0;
@@ -78,7 +83,7 @@ public class WekaSVM implements Runnable {
         }
 
         //Estraga valores
-        if (exception == 1){
+        if (exception == 1) {
             predict = 9999;
             real = 0.1;
         }
@@ -104,12 +109,12 @@ public class WekaSVM implements Runnable {
             svm.setSVMType(new SelectedTag(parametrosSVM.getType(), LibSVM.TAGS_SVMTYPE));
             svm.setCacheSize(1000);
             svm.setCoef0(0.0);
-            svm.setCost(1.0);
+            svm.setCost(parametrosSVM.getCost());
             svm.setDebug(false);
             svm.setDegree(3);
             svm.setDoNotReplaceMissingValues(true);
             svm.setEps(0.001);
-            svm.setGamma(0.0);
+            svm.setGamma(parametrosSVM.getGamma());
             svm.setKernelType(new SelectedTag(parametrosSVM.getKernel(), LibSVM.TAGS_KERNELTYPE));
             svm.setLoss(0.1);
             svm.setNormalize(true);
@@ -175,8 +180,6 @@ public class WekaSVM implements Runnable {
             gridSearch.setYStep(1);
             gridSearch.setYBase(2);
             gridSearch.setYExpression("pow(BASE,I)");
-
-
 
         } else {
             // evaluate gamma s 2^-5, 2^-4,..,2^2.

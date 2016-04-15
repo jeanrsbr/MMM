@@ -1,4 +1,4 @@
-ativo;dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto
+dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto
 2;1048576;0,0000305176;25;4;RAE;2;RBF;3;EPSILON_SVR;6,76;6,76;6,49;0,27;95,97
 2;1048576;0,0625;25;4;RAE;3;Sigmoid;3;EPSILON_SVR;6,76;6,76;-93244,58;93251,34;-1379357,72
 2;1048576;1024;25;4;RAE;1;Polynomial;3;EPSILON_SVR;6,76;6,76;6,9;0,14;102,03

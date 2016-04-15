@@ -5,10 +5,12 @@
  */
 package MMM.ANALISADOR;
 
+import MMM.ARFF.ARFFConstants;
 import MMM.MISC.ClientFTP;
 import MMM.MISC.ClienteFTPException;
 import MMM.MISC.LeituraProperties;
 import MMM.MISC.Log;
+import MMM.SVM.SVMConstants;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -18,8 +20,6 @@ import java.util.ArrayList;
  */
 public class ConsolidadorDeResultados {
 
-    private final static String ARFF_DIR = "ARFF/";
-    private final static String RESULTADO_DIR = "resultado/";
     private boolean usaFTP;
 
     public ConsolidadorDeResultados() {
@@ -45,14 +45,14 @@ public class ConsolidadorDeResultados {
             ArrayList<Resultado> resultados = new ArrayList<>();
 
             //Obtém a lista de arquivos do diretório ARFF
-            String[] listaArquivosARFF = listaArquivos(ARFF_DIR);
-            String[] listaArquivosResultado = listaArquivos(RESULTADO_DIR);
+            String[] listaArquivosARFF = listaArquivos(ARFFConstants.ARFF_FOLDER);
+            String[] listaArquivosResultado = listaArquivos(SVMConstants.RESULTADO_FOLDER);
 
             //Varre os arquivos para análise
             for (int i = 0; i < listaArquivosARFF.length; i++) {
 
                 //Inicia analise de determinado ativo
-                Analisador analisador = new Analisador(listaArquivosResultado[i], listaArquivosARFF[i]);
+                Analisador analisador = new Analisador(SVMConstants.RESULTADO_FOLDER + listaArquivosResultado[i], ARFFConstants.ARFF_FOLDER + listaArquivosARFF[i]);
                 //Inclui o resultado analisado deste ativo
                 resultados.add(analisador.analisa());
 
@@ -72,7 +72,9 @@ public class ConsolidadorDeResultados {
                 }
 
                 //Se houve um aumento exagerado, presume que o algoritmo loquetiou
-                if (resultados.get(i).getPercentualDiffValores() > 150)
+                if (resultados.get(i).getPercentualDiffValores() > 150){
+                    continue;
+                }
 
                 //Se o registro atual processado, possui uma diferença maior que o registro anterior
                 if (resultados.get(i).getPercentualDiffValores() > percentualDiffValoresAux){
@@ -109,12 +111,12 @@ public class ConsolidadorDeResultados {
         }
 
         //Verifica se possui todos os arquivos ARFF necessários
-        if (listaArquivos(ARFF_DIR).length != ativos.length){
+        if (listaArquivos(ARFFConstants.ARFF_FOLDER).length != ativos.length){
             throw new ConsolidadorDeResultadosException("A quantidade de arquivos ARFF não é igual a quantidade de ativos indicados para importação");
         }
 
         //Verifica se possui todos os arquivos de resultado necessários
-        if (listaArquivos(RESULTADO_DIR).length != ativos.length){
+        if (listaArquivos(SVMConstants.RESULTADO_FOLDER).length != ativos.length){
             throw new ConsolidadorDeResultadosException("A quantidade de arquivos de resultado não é igual a quantidade de ativos indicados para importação");
         }
     }
@@ -126,27 +128,27 @@ public class ConsolidadorDeResultados {
         ClientFTP arff = new ClientFTP();
         //Verifica se já foram processados todos os arquivos ARFF necessários
         while (true) {
-            if (arff.checkListFile(ARFF_DIR) == qtdArquivos) {
+            if (arff.checkListFile(ARFFConstants.ARFF_FOLDER) == qtdArquivos) {
                 break;
             }
             //
             Thread.sleep(10000);
         }
         //Baixa os arquivos ARFF
-        arff.receiveFile(ARFF_DIR);
+        arff.receiveFile(ARFFConstants.ARFF_FOLDER);
 
         //Baixa o arquivo CSV
         ClientFTP resultado = new ClientFTP();
 
         //Verifica se já foram processados todos os arquivos de resultado necessários
         while (true) {
-            if (resultado.checkListFile(RESULTADO_DIR) == qtdArquivos) {
+            if (resultado.checkListFile(SVMConstants.RESULTADO_FOLDER) == qtdArquivos) {
                 break;
             }
             //
             Thread.sleep(10000);
         }
-        resultado.receiveFile(RESULTADO_DIR);
+        resultado.receiveFile(SVMConstants.RESULTADO_FOLDER);
     }
 
 }

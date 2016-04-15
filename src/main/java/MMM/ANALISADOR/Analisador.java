@@ -7,7 +7,6 @@ package MMM.ANALISADOR;
 import MMM.SVM.ManipuladorParametroSVM;
 import MMM.SVM.ParametroSVM;
 import MMM.SVM.ParametroSVMException;
-import MMM.SVM.SVMConstants;
 import MMM.SVM.SVMExecutor;
 import MMM.SVM.WekaSVMException;
 import java.io.BufferedReader;
@@ -54,7 +53,7 @@ public class Analisador {
 
         ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM();
         //Abre arquivo CSV
-        BufferedReader br = new BufferedReader(new FileReader(SVMConstants.RESULTADO_FOLDER + arquivoResultado));
+        BufferedReader br = new BufferedReader(new FileReader(arquivoResultado));
 
         //Descarta a primeira linha
         br.readLine();
@@ -84,8 +83,14 @@ public class Analisador {
 
         //Varre os parâmetro obtidos
         for (int i = 0; i < parametros.size(); i++) {
-            //Soma o valor ao conjunto
-            Double valor = resultados.get(parametros.get(i).getId());
+            Double valor = 0d;
+            Long iD = parametros.get(i).getId();
+            //Se possui resultado no HASHMAP
+            if (resultados.get(parametros.get(i).getId()) != null){
+                valor = resultados.get(parametros.get(i).getId());
+            }
+                
+            //Soma o valor ao conjunto            
             valor = valor + parametros.get(i).getDiffMod();
             resultados.put(parametros.get(i).getId(), valor);
         }
@@ -110,9 +115,11 @@ public class Analisador {
             //Se o parâmetro possui o mesmo ID do menor e for o último dia analisado
             if (parametros.get(i).getId() == iD && parametros.get(i).getDiaInicial() == 2) {
                 parametroRetorno = parametros.get(i).clone();
+                break;
             }
         }
 
+        //Se não encontrou parâmetro válido
         if (parametroRetorno == null) {
             throw new AnalisadorException("Não foi possível encontrar o melhor parâmetro");
         }

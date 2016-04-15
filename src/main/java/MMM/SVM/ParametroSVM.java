@@ -38,8 +38,20 @@ public class ParametroSVM implements Cloneable {
         this.gridSearchEvaluation = gridSearchEvaluation;
         this.kernel = kernel;
         this.type = type;
+        gamma = getGammaDefault();
+        cost = getCostDefault();
     }
 
+    //Valor default do cost
+    public double getCostDefault(){
+        return 1.0;
+    }
+    
+    //Valor default do gamma
+    public double getGammaDefault(){
+        return 0.0;
+    }
+    
     public double getGamma() {
         return gamma;
     }
@@ -176,7 +188,7 @@ public class ParametroSVM implements Cloneable {
 
     //Monta o cabeçalho da classe
     public String montaCabecalho() {
-        return "ativo;dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto";
+        return "dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto";
     }
 
     public String montaLinha() throws ParametroSVMException {
@@ -253,10 +265,10 @@ public class ParametroSVM implements Cloneable {
     //Obtém ID único dos parâmetros da máquina de vetor de suporte
     public long getId() {
 
-        long tamGoedel = 2 * tamanhoDoConjunto;
-        long gridSearchGoedel = 3 * gridSearchEvaluation;
-        long kernelGoedel = 5 * kernel;
-        long typeGoedel = 7 * type;
+        long tamGoedel = (long) Math.pow(2, tamanhoDoConjunto);
+        long gridSearchGoedel = (long) Math.pow(3, gridSearchEvaluation);
+        long kernelGoedel = (long) Math.pow(5, kernel);
+        long typeGoedel = (long) Math.pow(7, type);
 
         return tamGoedel * gridSearchGoedel * kernelGoedel * typeGoedel;
     }
