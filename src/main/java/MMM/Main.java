@@ -42,60 +42,6 @@ public class Main {
                         println("Não existe o arquivo de propriedades no diretório \n" + properties.getAbsolutePath());
                 return;
             }
-            //Se não foi informada a data inicial
-            if (LeituraProperties.getInstance().leituraProperties("prop.DataIni").equals("")) {
-                System.out.println("É obrigatório informar a data inicial para importação");
-                return;
-            }
-
-            //Se não foi informada a data final
-            if (LeituraProperties.getInstance().leituraProperties("prop.DataFim").equals("")) {
-                System.out.println("É obrigatório informar a data inicial para importação");
-                return;
-            }
-
-            //Avalia o tipo de execução
-            int tipoExe = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("prop.tipoExe"));
-
-            //Se for execução do SVM
-            if (tipoExe == 1) {
-                
-                //Deleta os arquivos de ARFF
-                File aRFF = new File(ARFFConstants.ARFF_FOLDER);
-                //Verifica se existe o diretório
-                if (!aRFF.isDirectory()) {
-                    System.out.println("Não existe o diretório ARFF na pasta de execução");
-                    return;
-                }
-
-                String[] listaARFF = aRFF.list();
-                for (int i = 0; i < listaARFF.length; i++) {
-
-                    //Se for arquivo de resultado
-                    if (listaARFF[i].endsWith(".ARFF")) {
-                        new File(ARFFConstants.ARFF_FOLDER + listaARFF[i]).delete();
-                    }
-                }
-                
-                
-                
-                //Deleta os arquivos de resultado
-                File resultado = new File(SVMConstants.RESULTADO_FOLDER);
-                //Verifica se existe o diretório
-                if (!resultado.isDirectory()) {
-                    System.out.println("Não existe o diretório RESULTADO na pasta de execução");
-                    return;
-                }
-
-                String[] listaResultado = resultado.list();
-                for (int i = 0; i < listaResultado.length; i++) {
-
-                    //Se for arquivo de resultado
-                    if (listaResultado[i].endsWith(".csv")) {
-                        new File(SVMConstants.RESULTADO_FOLDER + listaResultado[i]).delete();
-                    }
-                }
-            }
 
             //Deleta os arquivos de LOG
             File log = new File("c:/temp/");
@@ -118,8 +64,8 @@ public class Main {
 
             //Inicializa o buffer
             Log.iniBuf();
-
-            if (tipoExe == 1) {
+            //Se for execução do SVM
+            if (LeituraProperties.getInstance().leituraPropertiesInteiro("prop.tipoExe") == 1) {
                 executaSVM();
             } else {
                 executaAnalisador();
@@ -133,9 +79,58 @@ public class Main {
 
     private static void executaSVM() throws GeraArquivoARFFException, ImportadorException, InsereParametrosException,
             BaixaArquivoException, IndicadoresException, NomeParametrosException, SVMExecutorException, WekaSVMException,
-            ParametroSVMException, FileNotFoundException {
+            ParametroSVMException, FileNotFoundException, ClienteFTPException {
+
+        //Se não foi informada a data inicial
+        if (LeituraProperties.getInstance().leituraPropertiesDataAlpha("prop.DataIni").equals("")) {
+            System.out.println("É obrigatório informar a data inicial para importação");
+            return;
+        }
+
+        //Se não foi informada a data final
+        if (LeituraProperties.getInstance().leituraPropertiesDataAlpha("prop.DataFim").equals("")) {
+            System.out.println("É obrigatório informar a data final para importação");
+            return;
+        }
+
+        //Deleta os arquivos de ARFF
+        File aRFF = new File(ARFFConstants.ARFF_FOLDER);
+        //Verifica se existe o diretório
+        if (!aRFF.isDirectory()) {
+            System.out.println("Não existe o diretório ARFF na pasta de execução");
+            return;
+        }
+
+        String[] listaARFF = aRFF.list();
+        for (int i = 0; i < listaARFF.length; i++) {
+
+            //Se for arquivo de resultado
+            if (listaARFF[i].endsWith(ARFFConstants.ARFF_EXT) && listaARFF[i].
+                    startsWith(ARFFConstants.ARFF_NAME_DATE)) {
+                new File(ARFFConstants.ARFF_FOLDER + listaARFF[i]).delete();
+            }
+        }
+
+        //Deleta os arquivos de resultado
+        File resultado = new File(SVMConstants.RESULTADO_FOLDER);
+        //Verifica se existe o diretório
+        if (!resultado.isDirectory()) {
+            System.out.println("Não existe o diretório RESULTADO na pasta de execução");
+            return;
+        }
+
+        String[] listaResultado = resultado.list();
+        for (int i = 0; i < listaResultado.length; i++) {
+
+            //Se for arquivo de resultado
+            if (listaResultado[i].endsWith(SVMConstants.RESULTADO_EXT) && listaResultado[i].
+                    startsWith(SVMConstants.RESULTADO_NAME_DATE)) {
+                new File(SVMConstants.RESULTADO_FOLDER + listaResultado[i]).delete();
+            }
+        }
+
         //Obtém a lista de ativos que devem ser importados
-        String[] ativos = LeituraProperties.getInstance().leituraProperties("prop.ativos").split("#");
+        String[] ativos = LeituraProperties.getInstance().leituraPropertiesString("prop.ativos").split("#");
 
         //Varre a lista de ativos a serem importados
         for (int i = 0; i < ativos.length; i++) {
@@ -160,8 +155,8 @@ public class Main {
             String arquivoARFF = geraArquivoARFF.geraArquivo();
 
             //Executar algoritmo SVM
-            SVMExecutor sVMAnalisador = new SVMExecutor(arquivoARFF);
-            sVMAnalisador.executaAnalise();
+            SVMExecutor sVMExecutor = new SVMExecutor(arquivoARFF);
+            sVMExecutor.executaAnalise();
 
         }
 

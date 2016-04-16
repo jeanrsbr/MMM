@@ -14,9 +14,7 @@ import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import MMM.MISC.LeituraProperties;
 
 /**
@@ -45,16 +43,21 @@ public class BaixaArquivo {
             //Declara a instância do arquivo para leitura
             BufferedReader br;
             //Se possui configurações de proxy
-            if (!LeituraProperties.getInstance().leituraProperties("conn.proxyHost").equals("")) {
+            if (!LeituraProperties.getInstance().leituraPropertiesString("conn.proxyHost").equals("")) {
                 // INFORMAÇÕES DE PROXY
-                System.setProperty("http.proxyHost", LeituraProperties.getInstance().leituraProperties("conn.proxyHost"));
-                System.setProperty("http.proxyPort", LeituraProperties.getInstance().leituraProperties("conn.proxyPort"));
+                System.
+                        setProperty("http.proxyHost", LeituraProperties.getInstance().
+                                leituraPropertiesString("conn.proxyHost"));
+                System.
+                        setProperty("http.proxyPort", LeituraProperties.getInstance().
+                                leituraPropertiesString("conn.proxyPort"));
 
                 // AUTENTICAÇÃO DE PROXY
                 Authenticator.setDefault(new Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(LeituraProperties.getInstance().leituraProperties("conn.proxyUser"), LeituraProperties.
-                                getInstance().leituraProperties("conn.proxyPassword").toCharArray());
+                        return new PasswordAuthentication(LeituraProperties.getInstance().
+                                leituraPropertiesString("conn.proxyUser"), LeituraProperties.
+                                getInstance().leituraPropertiesString("conn.proxyPassword").toCharArray());
                     }
                 });
 
@@ -77,61 +80,38 @@ public class BaixaArquivo {
 
     //Monta o link para efetuar a requisição
     private String montaLink() throws BaixaArquivoException {
-        try {
+        //Pega a instância atual
+        Calendar calendar = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataFim");
 
-            //Data final para leitura
-            String dataFim = LeituraProperties.getInstance().leituraProperties("prop.DataFim");
-            //Pega a instância atual
-            Calendar calendar = Calendar.getInstance();
-
-            //Se possui informado data final
-            if (!dataFim.equals("")) {
-                //Converte a data final para formato simples
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                Date date;
-                date = formatter.parse(dataFim);
-                calendar.setTime(date);
-            }
-
-            //Inicializa a data final
-            String anoFim = String.valueOf(calendar.get(Calendar.YEAR));
-            String mesFim = String.valueOf(calendar.get(Calendar.MONTH));
-            String diaFim = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-
-            //Pega a instância atual
-            calendar = Calendar.getInstance();
-
-            //Data inicial para leitura
-            String dataIni = LeituraProperties.getInstance().leituraProperties("prop.DataIni");
-            //Se possui data inicial
-            if (!dataIni.equals("")) {
-                //Converte a data final para formato simples
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                Date date;
-                date = formatter.parse(dataIni);
-                calendar.setTime(date);
-            } else {
-                //Força a data inicial como o ano de 2010
-                calendar.set(2010, 01, 01);
-            }
-
-            //Inicializa a data inicial
-            String anoIni = String.valueOf(calendar.get(Calendar.YEAR));
-            String mesIni = String.valueOf(calendar.get(Calendar.MONTH));
-            String diaIni = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-
-            //Monta URL para baixar a planilha CSV
-            return LeituraProperties.getInstance().leituraProperties("prop.CSV").
-                    replaceAll("#ATIVO#", ativo).
-                    replaceAll("#ANO_FIM#", anoFim).
-                    replaceAll("#MES_FIM#", mesFim).
-                    replaceAll("#DIA_FIM#", diaFim).
-                    replaceAll("#ANO_INI#", anoIni).
-                    replaceAll("#MES_INI#", mesIni).
-                    replaceAll("#DIA_INI#", diaIni);
-        } catch (ParseException ex) {
-            throw new BaixaArquivoException("Não foi possível realizar a conversão de datas corretamente", ex);
+        if (calendar == null){
+            throw new BaixaArquivoException("Houve erro no momento de obter a data final");
         }
+        //Inicializa a data final
+        String anoFim = String.valueOf(calendar.get(Calendar.YEAR));
+        String mesFim = String.valueOf(calendar.get(Calendar.MONTH));
+        String diaFim = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+
+        //Pega a instância atual
+        calendar = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataIni");
+
+        if (calendar == null){
+            throw new BaixaArquivoException("Houve erro no momento de obter a data inicial");
+        }
+
+        //Inicializa a data inicial
+        String anoIni = String.valueOf(calendar.get(Calendar.YEAR));
+        String mesIni = String.valueOf(calendar.get(Calendar.MONTH));
+        String diaIni = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+
+        //Monta URL para baixar a planilha CSV
+        return LeituraProperties.getInstance().leituraPropertiesString("prop.CSV").
+                replaceAll("#ATIVO#", ativo).
+                replaceAll("#ANO_FIM#", anoFim).
+                replaceAll("#MES_FIM#", mesFim).
+                replaceAll("#DIA_FIM#", diaFim).
+                replaceAll("#ANO_INI#", anoIni).
+                replaceAll("#MES_INI#", mesIni).
+                replaceAll("#DIA_INI#", diaIni);
 
     }
 }

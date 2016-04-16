@@ -14,14 +14,12 @@ public class ClientFTP {
     private final String usuario;
     private final String senha;
     private final String folderserver;
-    private final String folderlocal;
 
     public ClientFTP() {
-        this.endFTP = LeituraProperties.getInstance().leituraProperties("ftp.hostname");
-        this.usuario = LeituraProperties.getInstance().leituraProperties("ftp.username");
-        this.senha = LeituraProperties.getInstance().leituraProperties("ftp.password");
-        this.folderserver = LeituraProperties.getInstance().leituraProperties("ftp.folderserver");
-        this.folderlocal = LeituraProperties.getInstance().leituraProperties("ftp.folderlocal");
+        this.endFTP = LeituraProperties.getInstance().leituraPropertiesString("ftp.hostname");
+        this.usuario = LeituraProperties.getInstance().leituraPropertiesString("ftp.username");
+        this.senha = LeituraProperties.getInstance().leituraPropertiesString("ftp.password");
+        this.folderserver = LeituraProperties.getInstance().leituraPropertiesString("ftp.folderserver");
     }
 
     //Conecta ao servidor FTP
@@ -66,7 +64,7 @@ public class ClientFTP {
     }
 
     //Envia o arquivo para o servidor de FTP
-    public void sendFile(String fileName) throws ClienteFTPException {
+    public void sendFile(String fileName, String folder) throws ClienteFTPException {
         try {
             //abre um stream com o arquivo a ser enviado
             InputStream is;
@@ -79,9 +77,10 @@ public class ClientFTP {
             FTPClient ftp = connectFTP();
             //Indica arquivo do tipo ASCII
             ftp.setFileType(FTPClient.ASCII_FILE_TYPE);
+            ftp.changeWorkingDirectory(folderserver + folder);
 
             //Grava o arquivo no FTP
-            ftp.storeFile(folderserver + file.getName(), is);
+            ftp.storeFile(file.getName(), is);
 
             //Disconecta do FTP
             disconnectFTP(ftp);
@@ -89,7 +88,7 @@ public class ClientFTP {
             throw new ClienteFTPException("Não foi possível enviar o arquivo para o FTP");
         }
     }
-    
+
     //Verifica a quantidade de arquivos na pasta do FTP
     public int checkListFile(String folder) throws ClienteFTPException {
         try {
@@ -102,12 +101,15 @@ public class ClientFTP {
 
             //Obtém a lista de arquivos no FTP
             String[] lista = ftp.listNames();
-            
+
             int qtdArquivos = lista.length;
             qtdArquivos = qtdArquivos - 2; // Retira o "." e  ".." que não contam como arquivos
-            
+
+            //Disconecta do FTP
+            disconnectFTP(ftp);
+
             return qtdArquivos;
-        } catch (ClienteFTPException | IOException ex){
+        } catch (IOException ex){
             throw new ClienteFTPException("Não foi possível obter a quantidade de arquivos que estão no FTP");
         }
     }
@@ -133,9 +135,14 @@ public class ClientFTP {
 
             //Varre a lista de arquivos
             for (int i = 0; i < lista.length; i++) {
-                FileOutputStream fos;
+
+                //Se for os arquivos de pasta
+                if (lista[i].equals(".") || lista[i].equals("..")){
+                    continue;
+                }
+
                 //Cria o arquivo que será baixado(Na pasta indicada)
-                fos = new FileOutputStream(folderlocal + folder + lista[i]);
+                FileOutputStream fos = new FileOutputStream(folder + lista[i]);
                 //Descarrega o arquivo na pasta corrente
                 ftp.retrieveFile(lista[i], fos);
                 //Exclui o arquivo da pasta do FTP
@@ -143,7 +150,7 @@ public class ClientFTP {
             }
 
             disconnectFTP(ftp);
-        } catch (ClienteFTPException | IOException ex) {
+        } catch (IOException ex) {
             throw new ClienteFTPException("Não foi possível receber o arquivo do FTP");
         }
 

@@ -20,19 +20,18 @@ public class ManipuladorParametroSVM {
     private final int tamConjuntoFin;
 
     public ManipuladorParametroSVM() {
-        this.diasConjuntoTeste = Integer.parseInt(LeituraProperties.getInstance().
-                leituraProperties("svm.diasconjuntoteste"));
+        this.diasConjuntoTeste = LeituraProperties.getInstance().leituraPropertiesInteiro("svm.diasconjuntoteste");
         this.parametroSVM = new ArrayList<>();
-        this.tamConjuntoIni = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("svm.tamconjuntoini"));
-        this.tamConjuntoFin = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("svm.tamconjuntofin"));
+        this.tamConjuntoIni = LeituraProperties.getInstance().leituraPropertiesInteiro("svm.tamconjuntoini");
+        this.tamConjuntoFin = LeituraProperties.getInstance().leituraPropertiesInteiro("svm.tamconjuntofin");
 
     }
 
     //Inclui ocorrência de parâmetro
-    public void addParametro(ParametroSVM par){
-        parametroSVM.add(par);        
+    public void addParametro(ParametroSVM par) {
+        parametroSVM.add(par);
     }
-    
+
     public ArrayList<ParametroSVM> getParametroSVM() {
         return parametroSVM;
     }
@@ -61,14 +60,16 @@ public class ManipuladorParametroSVM {
 
     }
 
-    private void populaKernel(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation) throws ParametroSVMException {
+    private void populaKernel(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation) throws
+            ParametroSVMException {
         populaTipo(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, LibSVM.KERNELTYPE_RBF);
         populaTipo(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, LibSVM.KERNELTYPE_SIGMOID);
         populaTipo(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, LibSVM.KERNELTYPE_POLYNOMIAL);
         populaTipo(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, LibSVM.KERNELTYPE_LINEAR);
     }
 
-    private void populaTipo(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel) throws ParametroSVMException {
+    private void populaTipo(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel) throws
+            ParametroSVMException {
         gravaParametro(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, kernel, LibSVM.SVMTYPE_EPSILON_SVR);
 
 //        //Se não for o Kernel Polynomial (Demora para caralho)
@@ -77,7 +78,8 @@ public class ManipuladorParametroSVM {
 //        }
     }
 
-    private void gravaParametro(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
+    private void gravaParametro(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type)
+            throws ParametroSVMException {
         parametroSVM.add(new ParametroSVM(diaInicial, tamanhoDoConjunto, gridSearchEvaluation, kernel, type));
     }
 

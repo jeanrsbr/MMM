@@ -39,7 +39,7 @@ public class Analisador {
             SVMExecutor sVMAnalisador = new SVMExecutor(arquivoARFF);
             sVMAnalisador.executaAnalise(parametroSVM);
             //Incluir objeto de resultado
-            return new Resultado(arquivoARFF.split(".ARFF")[0], parametroSVM.getRealAnterior(), parametroSVM.getPredict(), 0);
+            return new Resultado(arquivoARFF.split(".ARFF")[0], parametroSVM.getCloseAnterior(), parametroSVM.getPredict(), 0);
 
 
         } catch (IOException | ParametroSVMException | AnalisadorException | CloneNotSupportedException | WekaSVMException ex) {
@@ -84,13 +84,12 @@ public class Analisador {
         //Varre os parâmetro obtidos
         for (int i = 0; i < parametros.size(); i++) {
             Double valor = 0d;
-            Long iD = parametros.get(i).getId();
             //Se possui resultado no HASHMAP
             if (resultados.get(parametros.get(i).getId()) != null){
                 valor = resultados.get(parametros.get(i).getId());
             }
-                
-            //Soma o valor ao conjunto            
+
+            //Soma o valor ao conjunto
             valor = valor + parametros.get(i).getDiffMod();
             resultados.put(parametros.get(i).getId(), valor);
         }

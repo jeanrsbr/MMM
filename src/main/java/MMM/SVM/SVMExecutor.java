@@ -4,6 +4,9 @@
  */
 package MMM.SVM;
 
+import MMM.ARFF.ARFFConstants;
+import MMM.MISC.ClientFTP;
+import MMM.MISC.ClienteFTPException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,10 +27,10 @@ public class SVMExecutor {
 
     public SVMExecutor(String nomArqARFF) {
         this.nomArqARFF = nomArqARFF;
-        numThreads = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("thread.svm"));
+        numThreads = LeituraProperties.getInstance().leituraPropertiesInteiro("thread.svm");
     }
 
-    public void executaAnalise() throws SVMExecutorException, WekaSVMException, ParametroSVMException {
+    public void executaAnalise() throws SVMExecutorException, WekaSVMException, ParametroSVMException, ClienteFTPException {
 
         try {
 
@@ -69,28 +72,28 @@ public class SVMExecutor {
             //Cria arquivo CSV
             criaCSV(analise);
 
-        } catch (WekaSVMException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             throw new SVMExecutorException("Não foi possível executar a predição");
         }
 
     }
-    
+
     //Executa a SVM para uma única configuração
     public ParametroSVM executaAnalise(ParametroSVM in) throws WekaSVMException, ParametroSVMException{
         WekaSVM analise = new WekaSVM(nomArqARFF, in);
         analise.perfomanceAnalysis();
         //Retorna o objeto com o resultado da análise
         return in;
-               
+
     }
-    
+
 
     private void criaCSV(ArrayList<ParametroSVM> analise) throws SVMExecutorException, WekaSVMException,
-            ParametroSVMException {
+            ParametroSVMException, ClienteFTPException {
 
         try {
             //Abre o arquivo CSV de resultados
-            File file = new File("resultado/" + getName().split(".arff")[0] + ".csv");
+            File file = new File(SVMConstants.RESULTADO_FOLDER + getName().split(ARFFConstants.ARFF_EXT)[0] + SVMConstants.RESULTADO_EXT);
             FileOutputStream arquivoGravacao = new FileOutputStream(file);
             OutputStreamWriter strWriter = new OutputStreamWriter(arquivoGravacao);
             BufferedWriter resultado = new BufferedWriter(strWriter);
@@ -107,6 +110,15 @@ public class SVMExecutor {
             }
             resultado.flush();
             resultado.close();
+
+            //Se utiliza FTP
+            if (LeituraProperties.getInstance().leituraPropertiesInteiro("ftp.ftp") == 1){
+                ClientFTP clientFTP = new ClientFTP();
+                clientFTP.sendFile(file.getAbsolutePath(), SVMConstants.RESULTADO_FOLDER);
+            }
+
+
+
         } catch (IOException ex) {
             throw new SVMExecutorException("Não foi possível criar o arquivo de resultado");
         }

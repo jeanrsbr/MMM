@@ -13,7 +13,7 @@ import java.io.PrintStream;
  */
 public class Log {
 
-    private static final int LOG = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("prop.log"));
+    private static final int LOG = LeituraProperties.getInstance().leituraPropertiesInteiro("prop.log");
     private static PrintStream defOut;
     private static PrintStream defErr;
 
@@ -33,7 +33,7 @@ public class Log {
         System.setOut(new PrintStream("c:/temp/output_weka_out" + ativo + ".txt"));
         System.setErr(new PrintStream("c:/temp/output_weka_err" + ativo + ".txt"));
     }
-    
+
     public static void loga(String mensagem) {
         if (LOG == 1) {
             defOut.println(mensagem);

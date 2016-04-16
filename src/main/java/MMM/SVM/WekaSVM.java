@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 import MMM.MISC.Log;
 import weka.classifiers.functions.LibSVM;
 import weka.classifiers.meta.GridSearch;
+import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SelectedTag;
 
@@ -56,9 +58,10 @@ public class WekaSVM implements Runnable {
 
         //Seta o valor do dia anterior
         parametrosSVM.setRealAnterior(train.instance(train.numInstances() - 1).classValue());
+        //Seta o valor de fechamento do dia anterior
+        parametrosSVM.setCloseAnterior(getClosePriceValue(train.instance(train.numInstances() - 1)));
 
         LibSVM svm = buildSVM();
-
         //Se já possui os parâmetros de COST e GAMMA inicializados
         if (parametrosSVM.getCost() == parametrosSVM.getCostDefault()
                 && parametrosSVM.getGamma() == parametrosSVM.getGammaDefault()) {
@@ -71,7 +74,7 @@ public class WekaSVM implements Runnable {
 
         Log.loga("EVALUATION:" + parametrosSVM.getGridSearchEvaluationAlfa() + " KERNEL:" + parametrosSVM.
                 getKernelAlfa() + " TYPE:" + parametrosSVM.getTypeAlfa() + " COST:" + svm.getCost() + " gamma:"
-                + svm.getGamma() + " TIME:" + (fim - ini));
+                + svm.getGamma() + " TIME:" + (fim - ini), "SVM");
 
         double real = test.instance(0).classValue();
         double predict = 0;
@@ -219,6 +222,18 @@ public class WekaSVM implements Runnable {
             exception = 1;
             throw new WekaSVMException("Não foi possível executar o algoritmo de predição");
         }
+    }
+
+    //Obtém o preço de fechamento do dia anterior
+    private double getClosePriceValue(Instance instance) throws WekaSVMException{
+        //Varre os atributos da instância
+        for (int i = 0; i < instance.numAttributes(); i++) {
+            //Se o atributo tiver o nome "Bra_ClosePrice"
+            if (instance.attribute(i).name().equals("Bra_ClosePrice")){
+                return instance.toDoubleArray()[i];
+            }
+        }
+        throw new WekaSVMException("Não foi possível encontrar o parâmetro CLOSEPRICE");
     }
 
     public Instances getDataSet() {

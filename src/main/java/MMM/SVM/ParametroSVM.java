@@ -25,8 +25,12 @@ public class ParametroSVM implements Cloneable {
     private double gamma;
     private double cost;
 
+    //VALORES DO DIA ANTERIOR
+    private double realAnterior; //TARGET
+    private double closeAnterior;
+
     //RESULTADOS OBTIDOS ATRAVÉS DE SVM
-    private double realAnterior; //Valor do dia anterior, para comparar no analisador
+
     private double real;
     private double predict;
     private double diffMod;
@@ -46,12 +50,12 @@ public class ParametroSVM implements Cloneable {
     public double getCostDefault(){
         return 1.0;
     }
-    
+
     //Valor default do gamma
     public double getGammaDefault(){
         return 0.0;
     }
-    
+
     public double getGamma() {
         return gamma;
     }
@@ -186,9 +190,19 @@ public class ParametroSVM implements Cloneable {
         this.realAnterior = realAnterior;
     }
 
+    public double getCloseAnterior() {
+        return closeAnterior;
+    }
+
+    public void setCloseAnterior(double closeAnterior) {
+        this.closeAnterior = closeAnterior;
+    }
+
+
+
     //Monta o cabeçalho da classe
     public String montaCabecalho() {
-        return "dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto";
+        return "dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;close_anterior;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto";
     }
 
     public String montaLinha() throws ParametroSVMException {
@@ -213,6 +227,8 @@ public class ParametroSVM implements Cloneable {
         linha.append(type);
         linha.append(";");
         linha.append(getTypeAlfa());
+        linha.append(";");
+        linha.append(EditaValores.edita2DecVirgula(closeAnterior));
         linha.append(";");
         linha.append(EditaValores.edita2DecVirgula(realAnterior));
         linha.append(";");
@@ -243,16 +259,18 @@ public class ParametroSVM implements Cloneable {
         //linha.append(getKernelAlfa());
         int typeCSV = Integer.parseInt(linhaDesmontada[8]);
         //linha.append(getTypeAlfa());
-        double realAnteriorCSV = Double.parseDouble(linhaDesmontada[10].replaceAll(",", "."));
-        double realCSV = Double.parseDouble(linhaDesmontada[11].replaceAll(",", "."));
-        double predictCSV = Double.parseDouble(linhaDesmontada[12].replaceAll(",", "."));
-        double diffModCSV = Double.parseDouble(linhaDesmontada[13].replaceAll(",", "."));
-        double percentualAcertoCSV = Double.parseDouble(linhaDesmontada[14].replaceAll(",", "."));
+        double closeAnteriorCSV = Double.parseDouble(linhaDesmontada[10].replaceAll(",", "."));
+        double realAnteriorCSV = Double.parseDouble(linhaDesmontada[11].replaceAll(",", "."));
+        double realCSV = Double.parseDouble(linhaDesmontada[12].replaceAll(",", "."));
+        double predictCSV = Double.parseDouble(linhaDesmontada[13].replaceAll(",", "."));
+        double diffModCSV = Double.parseDouble(linhaDesmontada[14].replaceAll(",", "."));
+        double percentualAcertoCSV = Double.parseDouble(linhaDesmontada[15].replaceAll(",", "."));
 
         //Monta o parâmetro de acordo com o CSV
         ParametroSVM parametroSVM = new ParametroSVM(diaInicialCSV, tamanhoDoConjuntoCSV, gridSearchEvaluationCSV, kernelCSV, typeCSV);
         parametroSVM.setCost(costCSV);
         parametroSVM.setGamma(gammaCSV);
+        parametroSVM.setCloseAnterior(closeAnteriorCSV);
         parametroSVM.setRealAnterior(realAnteriorCSV);
         parametroSVM.setReal(realCSV);
         parametroSVM.setPredict(predictCSV);

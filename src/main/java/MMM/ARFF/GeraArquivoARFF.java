@@ -24,6 +24,8 @@ import MMM.MISC.Log;
 import MMM.ARFF.IMPORT.BaixaArquivoException;
 import MMM.ARFF.IMPORT.Importador;
 import MMM.ARFF.IMPORT.ImportadorException;
+import MMM.MISC.ClientFTP;
+import MMM.MISC.ClienteFTPException;
 import MMM.MISC.EditaValores;
 
 /**
@@ -32,7 +34,6 @@ import MMM.MISC.EditaValores;
  */
 public class GeraArquivoARFF {
 
-    private final String extARFF = ".arff";
     private String ativoBrasil;
     private String ativoEst;
 
@@ -43,12 +44,12 @@ public class GeraArquivoARFF {
 
     //Gera o arquivo ARFF
     public String geraArquivo() throws GeraArquivoARFFException, ImportadorException, InsereParametrosException,
-            BaixaArquivoException, IndicadoresException, NomeParametrosException {
+            BaixaArquivoException, IndicadoresException, NomeParametrosException, ClienteFTPException {
 
         //------------------------- IDENTIFICAÇÃO DOS PARAMÊTROS  --------------------
         //Obtém a lista de ativos que devem ser importados
         NomeParametros nomeParametros = new NomeParametros(LeituraProperties.getInstance().
-                leituraProperties("ind.indicadores").split(";"));
+                leituraPropertiesString("ind.indicadores").split(";"));
 
         //------------------------- INSERÇÃO DOS PARAMETROS --------------------
         //Instância os parâmetros com o primeiro ativo
@@ -103,7 +104,7 @@ public class GeraArquivoARFF {
         manipulaParametros.criaTarget(nomeParametros.getOcoTarget());
 
         //------------------------- VALIDA OS PARAMETROS --------------------
-        int valida = Integer.parseInt(LeituraProperties.getInstance().leituraProperties("prop.valida"));
+        int valida = LeituraProperties.getInstance().leituraPropertiesInteiro("prop.valida");
         //Se deve validar
         if (valida == 1) {
             Log.loga("Iniciando etapa de validação dos dados", "VALIDAÇÃO");
@@ -120,13 +121,11 @@ public class GeraArquivoARFF {
 
     //Gera arquivo ARFF
     private String geraArquivo(ManipulaParametros manipulaParametros, NomeParametros nomeParametros) throws
-            GeraArquivoARFFException, InsereParametrosException {
+            GeraArquivoARFFException, InsereParametrosException, ClienteFTPException {
 
         try {
 
-            String diretorio = LeituraProperties.getInstance().leituraProperties("prop.diretorioARFF");
-
-            File dir = new File(diretorio);
+            File dir = new File(ARFFConstants.ARFF_FOLDER);
             //Se o diretório existe
             if (!dir.exists()) {
                 Log.loga("O diretório " + dir.getAbsolutePath() + " para criação do arquivo ARFF não existe", "ARFF");
@@ -134,7 +133,7 @@ public class GeraArquivoARFF {
             }
 
             //Abre o arquivo
-            File file = new File(diretorio + manipulaParametros.getAtivo() + extARFF);
+            File file = new File(ARFFConstants.ARFF_FOLDER + ARFFConstants.ARFF_NAME_DATE + "_" + manipulaParametros.getAtivo() + ARFFConstants.ARFF_EXT);
             Log.loga("Arquivo ARFF: " + file.getAbsolutePath(), "ARFF");
 
             FileOutputStream arquivoGravacao = new FileOutputStream(file);
@@ -147,8 +146,8 @@ public class GeraArquivoARFF {
             writer.newLine();
             writer.
                     write(new String("% The data provided are daily stock prices from #INICIO# through #FIM#, for #ATIVO#.").
-                    replaceAll("#INICIO#", LeituraProperties.getInstance().leituraProperties("prop.DataIni")).
-                    replaceAll("#FIM#", LeituraProperties.getInstance().leituraProperties("prop.DataFim")).
+                    replaceAll("#INICIO#", LeituraProperties.getInstance().leituraPropertiesString("prop.DataIni")).
+                    replaceAll("#FIM#", LeituraProperties.getInstance().leituraPropertiesString("prop.DataFim")).
                     replaceAll("#ATIVO#", manipulaParametros.getAtivo()));
             writer.newLine();
             writer.write("%");
@@ -199,6 +198,13 @@ public class GeraArquivoARFF {
             }
             //Fecha o arquivo
             writer.close();
+
+            //Se utiliza FTP
+            if (LeituraProperties.getInstance().leituraPropertiesInteiro("ftp.ftp") == 1){
+                ClientFTP clientFTP = new ClientFTP();
+                clientFTP.sendFile(file.getAbsolutePath(), ARFFConstants.ARFF_FOLDER);
+            }
+
             return file.getAbsolutePath();
 
         } catch (IOException | IllegalArgumentException ex) {

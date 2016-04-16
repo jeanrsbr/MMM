@@ -26,14 +26,14 @@ public class ConsolidadorDeResultados {
         //Indica que usa FTP
         usaFTP = true;
         //Se não usa FTP
-        if (Integer.parseInt(LeituraProperties.getInstance().leituraProperties("ftp.ftp")) == 0) {
+        if (LeituraProperties.getInstance().leituraPropertiesInteiro("ftp.ftp") == 0) {
             usaFTP = false;
         }
 
     }
 
     //Realiza a consolidação de resultados e sugere qual ativo deve ser comprado ou vendido
-    public void sugereCompra() throws ConsolidadorDeResultadosException {
+    public void sugereCompra() throws ConsolidadorDeResultadosException, AnalisadorException, ClienteFTPException {
 
         try {
 
@@ -87,8 +87,13 @@ public class ConsolidadorDeResultados {
 
             //Indica ao usuário quais dos ativos devem ser investidos
             Log.loga("Invista no ativo: " + resultados.get(indAux).getAtivo(), "ANALISE");
+            Log.loga("Lucratividade prevista: " + resultados.get(indAux).getPercentualDiffValores(), "ANALISE");
+            Log.loga("Valor previsto: " + resultados.get(indAux).getDiffValores(), "ANALISE");
+            Log.loga("Valor predito: " + resultados.get(indAux).getValorPredito(), "ANALISE");
+            Log.loga("Valor fechamento: " + resultados.get(indAux).getValorHoje(), "ANALISE");
 
-        } catch (Exception ex) {
+
+        } catch (InterruptedException ex) {
             throw new ConsolidadorDeResultadosException("Houve um erro no momento de consolidar os resultados");
         }
     }
@@ -103,7 +108,7 @@ public class ConsolidadorDeResultados {
     private void validaArquivos() throws ClienteFTPException, InterruptedException, ConsolidadorDeResultadosException {
 
         //Obtém a lista de ativos que devem ser importados
-        String[] ativos = LeituraProperties.getInstance().leituraProperties("prop.ativos").split("#");
+        String[] ativos = LeituraProperties.getInstance().leituraPropertiesString("prop.ativos").split("#");
 
         //Se deve obter os arquivos do FTP
         if (usaFTP) {
