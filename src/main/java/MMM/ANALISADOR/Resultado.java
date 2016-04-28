@@ -5,6 +5,8 @@
  */
 package MMM.ANALISADOR;
 
+import java.util.Date;
+
 /**
  *
  * @author Jean-NoteI5
@@ -12,19 +14,25 @@ package MMM.ANALISADOR;
 public class Resultado {
     
     private final String ativo;
+    private final Date data;
     private final double valorHoje;
     private final double valorPredito;
     private final double diffValores;
     private final double percentualDiffValores;
     private final int tipo; //0 = Máximo / 1 = Mínimo
+    private final double stopGain;
+    private final double stopLoss;
 
-    public Resultado(String ativo, double valorHoje, double valorPredito, int tipo) {
+    public Resultado(String ativo, Date data, double valorHoje, double valorPredito, int tipo) {
         this.ativo = ativo;
+        this.data = data;
         this.valorHoje = valorHoje;
         this.valorPredito = valorPredito;
         this.tipo = tipo;
         diffValores = valorPredito - valorHoje;
         percentualDiffValores = (valorPredito / valorHoje) * 100;
+        stopGain = valorHoje + (diffValores * 0.8);
+        stopLoss = valorHoje - (diffValores * 0.2667);        
     }
 
     public String getAtivo() {
@@ -50,5 +58,19 @@ public class Resultado {
     public int getTipo() {
         return tipo;
     }
+
+    public Date getData() {
+        return data;
+    }
+
+    public double getStopGain() {
+        return stopGain;
+    }
+
+    public double getStopLoss() {
+        return stopLoss;
+    }
+    
+    
     
 }

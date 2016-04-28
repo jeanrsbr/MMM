@@ -4,16 +4,21 @@
  */
 package MMM.ANALISADOR;
 
+import MMM.ARFF.ARFFConstants;
 import MMM.SVM.ManipuladorParametroSVM;
 import MMM.SVM.ParametroSVM;
 import MMM.SVM.ParametroSVMException;
+import MMM.SVM.SVMConstants;
 import MMM.SVM.SVMExecutor;
 import MMM.SVM.WekaSVMException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -24,22 +29,53 @@ public class Analisador {
 
     private final String arquivoResultado;
     private final String arquivoARFF;
+    private final Date data;
+    private final String ativo;
 
-    public Analisador(String arquivoResultado, String arquivoARFF) {
+    public Analisador(String arquivoResultado, String arquivoARFF) throws AnalisadorException {
         this.arquivoResultado = arquivoResultado;
         this.arquivoARFF = arquivoARFF;
+        data = getData();
+        ativo = getAtivo();
+        
     }
 
+    
+    //Obtém o nome do ativo a partir do nome do arquivo
+    private String getAtivo(){
+    
+        //Separa os elementos do arquivo ARFF
+        String[] nomeArq = arquivoARFF.split("_");
+        String ativo = nomeArq[1].replaceAll(ARFFConstants.ARFF_EXT, "");
+        ativo = ativo.replaceAll(".SA", "");
+        return ativo;
+        
+    }
+    
+    
+    //Obtém o dia da análise a partir do nome do arquivo
+    private Date getData() throws AnalisadorException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        //Separa os elementos do arquivo ARFF
+        String[] nomeArq = arquivoARFF.split("_");
+        try {
+            //Retorna o dia da análise
+            return formatter.parse(nomeArq[0]);
+        } catch (ParseException ex) {
+            throw new AnalisadorException("Ocorreu um problema no momento de desmontar o nome do arquivo para encontrar a data");
+        }
+    }
+    
     public Resultado analisa() throws AnalisadorException {
 
         try {
             //Encontra a linha de parâmetros que obteve o melhor resultado
             ParametroSVM parametroSVM = encontraMelhoresParametros(carregaCSV());
             //Executar algoritmo SVM
-            SVMExecutor sVMAnalisador = new SVMExecutor(arquivoARFF);
+            SVMExecutor sVMAnalisador = new SVMExecutor(ARFFConstants.ARFF_FOLDER + arquivoARFF);
             sVMAnalisador.executaAnalise(parametroSVM);
             //Incluir objeto de resultado
-            return new Resultado(arquivoARFF.split(".ARFF")[0], parametroSVM.getCloseAnterior(), parametroSVM.getPredict(), 0);
+            return new Resultado(ativo, data, parametroSVM.getCloseAnterior(), parametroSVM.getPredict(), 0);
 
 
         } catch (IOException | ParametroSVMException | AnalisadorException | CloneNotSupportedException | WekaSVMException ex) {
@@ -53,7 +89,7 @@ public class Analisador {
 
         ManipuladorParametroSVM manipuladorParametroSVM = new ManipuladorParametroSVM();
         //Abre arquivo CSV
-        BufferedReader br = new BufferedReader(new FileReader(arquivoResultado));
+        BufferedReader br = new BufferedReader(new FileReader(SVMConstants.RESULTADO_FOLDER + arquivoResultado));
 
         //Descarta a primeira linha
         br.readLine();
