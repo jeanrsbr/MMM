@@ -27,6 +27,8 @@ import MMM.ARFF.IMPORT.ImportadorException;
 import MMM.MISC.ClientFTP;
 import MMM.MISC.ClienteFTPException;
 import MMM.MISC.EditaValores;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -34,12 +36,17 @@ import MMM.MISC.EditaValores;
  */
 public class GeraArquivoARFF {
 
-    private String ativoBrasil;
-    private String ativoEst;
+    private final String ativoBrasil;
+    private final String ativoEst;
+    private final Date dataInicial;
+    private final Date dataFinal;
 
-    public GeraArquivoARFF(String ativoBrasil, String ativoUsa) {
+    public GeraArquivoARFF(String ativoBrasil, String ativoUsa, Date dataInicial, Date dataFinal) {
         this.ativoBrasil = ativoBrasil;
         this.ativoEst = ativoUsa;
+        this.dataInicial = dataInicial;
+        this.dataFinal = dataFinal;
+
     }
 
     //Gera o arquivo ARFF
@@ -57,7 +64,7 @@ public class GeraArquivoARFF {
 
         //Baixa arquivo CSV e Converte arquivo para memória
         Log.loga("Importando o ativo " + ativoBrasil, "INSERÇÃO");
-        Importador importador = new Importador(ativoBrasil);
+        Importador importador = new Importador(ativoBrasil, dataInicial, dataFinal);
         TimeSeries timeseries = importador.montaTimeSeries();
         Log.loga("Criada série temporal do ativo " + ativoBrasil + " com " + timeseries.getTickCount()
                 + " registros", "INSERÇÃO");
@@ -76,7 +83,7 @@ public class GeraArquivoARFF {
         if (ativoEst != null) {
             //Baixa arquivo CSV e Converte arquivo para memória
             Log.loga("Importando o ativo " + ativoEst, "INSERÇÃO");
-            importador = new Importador(ativoEst);
+            importador = new Importador(ativoEst, dataInicial, dataFinal);
             timeseries = importador.montaTimeSeries();
             Log.loga("Criada série temporal do ativo " + ativoEst + " com " + timeseries.getTickCount() + " registros", "INSERÇÃO");
             insereParametros.insereSerieTemporalEstrangeiro(timeseries);
@@ -132,8 +139,10 @@ public class GeraArquivoARFF {
                 throw new GeraArquivoARFFException("Não foi possível gerar o arquivo ARFF");
             }
 
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
             //Abre o arquivo
-            File file = new File(ARFFConstants.ARFF_FOLDER + ARFFConstants.ARFF_NAME_DATE + "_" + manipulaParametros.getAtivo() + ARFFConstants.ARFF_EXT);
+            File file = new File(ARFFConstants.ARFF_FOLDER + formatter.format(dataFinal) + "_" + manipulaParametros.getAtivo() + ARFFConstants.ARFF_EXT);
             Log.loga("Arquivo ARFF: " + file.getAbsolutePath(), "ARFF");
 
             FileOutputStream arquivoGravacao = new FileOutputStream(file);
@@ -144,11 +153,14 @@ public class GeraArquivoARFF {
             writer.newLine();
             writer.write("%");
             writer.newLine();
+
+            formatter = new SimpleDateFormat("dd/MM/yyyy");
+
             writer.
                     write(new String("% The data provided are daily stock prices from #INICIO# through #FIM#, for #ATIVO#.").
-                    replaceAll("#INICIO#", LeituraProperties.getInstance().leituraPropertiesString("prop.DataIni")).
-                    replaceAll("#FIM#", LeituraProperties.getInstance().leituraPropertiesString("prop.DataFim")).
-                    replaceAll("#ATIVO#", manipulaParametros.getAtivo()));
+                            replaceAll("#INICIO#", formatter.format(dataInicial)).
+                            replaceAll("#FIM#", formatter.format(dataFinal)).
+                            replaceAll("#ATIVO#", manipulaParametros.getAtivo()));
             writer.newLine();
             writer.write("%");
             writer.newLine();
@@ -200,7 +212,7 @@ public class GeraArquivoARFF {
             writer.close();
 
             //Se utiliza FTP
-            if (LeituraProperties.getInstance().leituraPropertiesInteiro("ftp.ftp") == 1){
+            if (LeituraProperties.getInstance().leituraPropertiesInteiro("ftp.ftp") == 1) {
                 ClientFTP clientFTP = new ClientFTP();
                 clientFTP.sendFile(file.getAbsolutePath(), ARFFConstants.ARFF_FOLDER);
             }

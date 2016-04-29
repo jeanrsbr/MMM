@@ -12,6 +12,7 @@ import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.joda.time.DateTime;
 
@@ -21,10 +22,14 @@ import org.joda.time.DateTime;
  */
 public class Importador {
 
-    private String ativo;
+    private final String ativo;
+    private final Date dataInicial;
+    private final Date dataFinal;
 
-    public Importador(String ativo) {
+    public Importador(String ativo, Date dataInicial, Date dataFinal) {
         this.ativo = ativo;
+        this.dataInicial = dataInicial;
+        this.dataFinal = dataFinal;
     }
 
     //Monta a série temporal
@@ -35,11 +40,9 @@ public class Importador {
             PrintStream def = new PrintStream(System.err);
             System.setErr(new PrintStream("output_weka.txt"));
 
-
             //Baixa arquivo CSV
-            BaixaArquivo baixaArquivo = new BaixaArquivo(ativo);
+            BaixaArquivo baixaArquivo = new BaixaArquivo(ativo, dataInicial, dataFinal);
             BufferedReader br = baixaArquivo.downloadArquivo();
-
 
             List<Tick> ticks = new ArrayList<>();
 
@@ -74,9 +77,9 @@ public class Importador {
             }
 
             TimeSeries timeInvertida = new TimeSeries(ativo, ticksInv);
-            
+
             System.setErr(def);
-            
+
             return timeInvertida;
         } catch (IOException | ParseException ex) {
             throw new ImportadorException("Ocorreu um erro no momento de importar o arquivo CSV", ex);

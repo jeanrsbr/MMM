@@ -23,6 +23,9 @@ import MMM.SVM.SVMConstants;
 import MMM.SVM.SVMExecutor;
 import MMM.SVM.SVMExecutorException;
 import MMM.SVM.WekaSVMException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
@@ -93,6 +96,46 @@ public class Main {
             return;
         }
 
+        
+        
+        //Pega a data inicial de exportação
+        Calendar calendarAtu = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataIni");
+        
+        //Pega a data final de exportação
+        Calendar calendarFim = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataFim");
+        
+        
+        //TODO: Testar se funciona quando processa um mês parcial
+        
+        //Enquanto o dia inicial for menor que o dia final
+        while(calendarAtu.before(calendarFim)){
+            
+            //Se for sábado ou Domingo
+            if (calendarAtu.get(Calendar.DAY_OF_WEEK) == 1 || calendarAtu.get(Calendar.DAY_OF_WEEK) == 7){
+                //Incrementa o dia
+                calendarAtu.add(Calendar.DAY_OF_MONTH, 1);
+                continue;
+            }
+            
+            Calendar dataInicial = (Calendar) calendarAtu.clone();
+            dataInicial.add(Calendar.YEAR, -1);
+            Calendar dataFinal = (Calendar) calendarAtu.clone();
+            
+            Date data = calendarAtu.getTime();
+            
+//            executaSVMDia(dataInicial.getTime(), dataFinal.getTime());
+            
+            //Incrementa o dia
+            calendarAtu.add(Calendar.DAY_OF_MONTH, 1);
+        }
+    }
+
+    private static void executaSVMDia(Date dataInicial, Date dataFinal) throws GeraArquivoARFFException, ImportadorException, InsereParametrosException,
+            BaixaArquivoException, IndicadoresException, NomeParametrosException, SVMExecutorException, WekaSVMException,
+            ParametroSVMException, FileNotFoundException, ClienteFTPException {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        
         //Deleta os arquivos de ARFF
         File aRFF = new File(ARFFConstants.ARFF_FOLDER);
         //Verifica se existe o diretório
@@ -106,7 +149,7 @@ public class Main {
 
             //Se for arquivo de resultado
             if (listaARFF[i].endsWith(ARFFConstants.ARFF_EXT) && listaARFF[i].
-                    startsWith(ARFFConstants.ARFF_NAME_DATE)) {
+                    startsWith(formatter.format(dataFinal))) {
                 new File(ARFFConstants.ARFF_FOLDER + listaARFF[i]).delete();
             }
         }
@@ -119,12 +162,13 @@ public class Main {
             return;
         }
 
+        
         String[] listaResultado = resultado.list();
         for (int i = 0; i < listaResultado.length; i++) {
 
             //Se for arquivo de resultado
             if (listaResultado[i].endsWith(SVMConstants.RESULTADO_EXT) && listaResultado[i].
-                    startsWith(SVMConstants.RESULTADO_NAME_DATE)) {
+                    startsWith(formatter.format(dataFinal))) {
                 new File(SVMConstants.RESULTADO_FOLDER + listaResultado[i]).delete();
             }
         }
@@ -150,7 +194,7 @@ public class Main {
             //Criar arquivo ARFF
             Log.loga("Será gerado o arquivo ARFF", "ARFF");
             //Instância a geração de arquivos ARFF
-            GeraArquivoARFF geraArquivoARFF = new GeraArquivoARFF(atiPaises[0], atiPaises[1]);
+            GeraArquivoARFF geraArquivoARFF = new GeraArquivoARFF(atiPaises[0], atiPaises[1], dataInicial, dataFinal);
             //Gera o arquivo ARFF com a quantidade de ativos indicada no properties
             String arquivoARFF = geraArquivoARFF.geraArquivo();
 

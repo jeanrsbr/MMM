@@ -13,9 +13,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.Calendar;
 import MMM.MISC.LeituraProperties;
+import java.util.Date;
 
 /**
  *
@@ -23,10 +23,14 @@ import MMM.MISC.LeituraProperties;
  */
 public class BaixaArquivo {
 
-    String ativo;
+    private final String ativo;
+    private final Date dataInicial;
+    private final Date dataFinal;
 
-    public BaixaArquivo(String ativo) {
+    public BaixaArquivo(String ativo, Date dataInicial, Date dataFinal) {
         this.ativo = ativo;
+        this.dataInicial = dataInicial;
+        this.dataFinal = dataFinal;
     }
 
     public BufferedReader downloadArquivo() throws BaixaArquivoException {
@@ -81,22 +85,17 @@ public class BaixaArquivo {
     //Monta o link para efetuar a requisição
     private String montaLink() throws BaixaArquivoException {
         //Pega a instância atual
-        Calendar calendar = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataFim");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dataFinal);
 
-        if (calendar == null){
-            throw new BaixaArquivoException("Houve erro no momento de obter a data final");
-        }
         //Inicializa a data final
         String anoFim = String.valueOf(calendar.get(Calendar.YEAR));
         String mesFim = String.valueOf(calendar.get(Calendar.MONTH));
         String diaFim = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
 
         //Pega a instância atual
-        calendar = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataIni");
-
-        if (calendar == null){
-            throw new BaixaArquivoException("Houve erro no momento de obter a data inicial");
-        }
+        calendar = Calendar.getInstance();
+        calendar.setTime(dataInicial);
 
         //Inicializa a data inicial
         String anoIni = String.valueOf(calendar.get(Calendar.YEAR));
