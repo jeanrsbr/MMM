@@ -23,7 +23,7 @@
 
                     <archive>
                         <manifest>
-                            <mainClass>tccmaven.Main</mainClass>
+                            <mainClass>MMM.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

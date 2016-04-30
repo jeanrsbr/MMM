@@ -28,6 +28,7 @@ import MMM.MISC.ClientFTP;
 import MMM.MISC.ClienteFTPException;
 import MMM.MISC.EditaValores;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -162,7 +163,7 @@ public class GeraArquivoARFF {
                             replaceAll("#FIM#", formatter.format(dataFinal)).
                             replaceAll("#ATIVO#", manipulaParametros.getAtivo()));
             writer.newLine();
-            writer.write("%");
+            writer.write("% Time: " + Calendar.getInstance().getTime());
             writer.newLine();
             writer.write("% Source: collection of regression datasets by Jean Felipe Hartz (jeanrsbr@gmail.com) at");
             writer.newLine();

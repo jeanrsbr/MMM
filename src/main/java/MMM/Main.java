@@ -104,11 +104,8 @@ public class Main {
         //Pega a data final de exportação
         Calendar calendarFim = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataFim");
         
-        
-        //TODO: Testar se funciona quando processa um mês parcial
-        
         //Enquanto o dia inicial for menor que o dia final
-        while(calendarAtu.before(calendarFim)){
+        while(calendarAtu.before(calendarFim) || calendarAtu.equals(calendarFim)){
             
             //Se for sábado ou Domingo
             if (calendarAtu.get(Calendar.DAY_OF_WEEK) == 1 || calendarAtu.get(Calendar.DAY_OF_WEEK) == 7){
@@ -120,11 +117,7 @@ public class Main {
             Calendar dataInicial = (Calendar) calendarAtu.clone();
             dataInicial.add(Calendar.YEAR, -1);
             Calendar dataFinal = (Calendar) calendarAtu.clone();
-            
-            Date data = calendarAtu.getTime();
-            
-//            executaSVMDia(dataInicial.getTime(), dataFinal.getTime());
-            
+            executaSVMDia(dataInicial.getTime(), dataFinal.getTime());
             //Incrementa o dia
             calendarAtu.add(Calendar.DAY_OF_MONTH, 1);
         }
