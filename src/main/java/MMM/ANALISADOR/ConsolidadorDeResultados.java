@@ -46,11 +46,11 @@ public class ConsolidadorDeResultados {
 
         try {
 
-            Log.loga("Inicio da fun√ß√£o de sugest√£o de compra", "COMPRA");
+            Log.loga("Inicio da funÁ„o de sugest„o de compra", "COMPRA");
             //Valida os arquivos existentes no diret√≥rio
             validaArquivos();
 
-            Log.loga("Arquivos est√£o v√°lidos para importa√ß√£o", "COMPRA");
+            Log.loga("Arquivos est„o v·lidos para importaÁ„o", "COMPRA");
 
             //Popula array de resultados
             ArrayList<Resultado> resultados = new ArrayList<>();
@@ -65,7 +65,7 @@ public class ConsolidadorDeResultados {
 
                 //Se os arquivos n√£o tiverem o mesmo nome
                 if (!listaArquivosARFF[i].replaceAll(".ARFF", "").equals(listaArquivosResultado[i].replaceAll(".csv", ""))) {
-                    throw new ConsolidadorDeResultadosException("A pasta de ARFF e resultados n√£o esta igual");
+                    throw new ConsolidadorDeResultadosException("A pasta de ARFF e resultados n„o est· igual");
                 }
                 //Inicia analise de determinado ativo
                 Analisador analisador = new Analisador(listaArquivosResultado[i], listaArquivosARFF[i]);
@@ -81,7 +81,7 @@ public class ConsolidadorDeResultados {
 
                 //Se preveu que o ativo vai baixar de pre√ßo
                 if (resultados.get(i).getPercentualDiffValores() <= 100) {
-                    Log.loga("Dia:" + resultados.get(i).getData().toString() + " Diff:" + resultados.get(i).getPercentualDiffValores(), "PREJU√çZO");
+                    Log.loga("Dia:" + resultados.get(i).getData().toString() + " Diff:" + resultados.get(i).getPercentualDiffValores(), "PREJU√?ZO");
                     continue;
                 }
 
@@ -131,7 +131,7 @@ public class ConsolidadorDeResultados {
             predicoes.write("data;prioridade;ativo;stopGain;StopLoss");
             predicoes.newLine();
 
-            Log.loga("Iniciando exporta√ß√£o do arquivo CSV de predi√ß√µes", "PREDICOES");
+            Log.loga("Iniciando exportaÁ„o do arquivo CSV de prediÁıes", "PREDICOES");
 
             //Cria arquivo CSV com os melhores resultados
             Set<Date> chaves = melhoresResultados.keySet();
@@ -161,7 +161,7 @@ public class ConsolidadorDeResultados {
             predicoes.close();
 
         } catch (IOException ex) {
-            throw new ConsolidadorDeResultadosException("Houve um problema no momento de gerar o arquivo CSV com as predi√ß√µes");
+            throw new ConsolidadorDeResultadosException("Houve um problema no momento de gerar o arquivo CSV com as prediÁıes");
         }
 
     }
@@ -182,7 +182,7 @@ public class ConsolidadorDeResultados {
 
         //Verifica se possui todos os arquivos ARFF necess√°rios
         if (listaArquivos(ARFFConstants.ARFF_FOLDER).length != listaArquivos(SVMConstants.RESULTADO_FOLDER).length) {
-            throw new ConsolidadorDeResultadosException("A quantidade de arquivos ARFF n√£o √© igual a quantidade de Resultados");
+            throw new ConsolidadorDeResultadosException("A quantidade de arquivos ARFF n„o È igual a quantidade de Resultados");
         }
 
     }

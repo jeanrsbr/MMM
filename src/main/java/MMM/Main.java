@@ -37,12 +37,12 @@ public class Main {
 
         try {
 
-            //Inst√¢ncia o arquivo de propriedades
+            //Inst‚ncia o arquivo de propriedades
             File properties = new File("properties/dados.properties");
             //Verifica se existe o arquivo de propriedades
             if (!properties.exists()) {
                 System.out.
-                        println("N√£o existe o arquivo de propriedades no diret√≥rio \n" + properties.getAbsolutePath());
+                        println("N„o existe o arquivo de propriedades no diretÛrio \n" + properties.getAbsolutePath());
                 return;
             }
 
@@ -50,7 +50,7 @@ public class Main {
             File log = new File("c:/temp/");
 
             if (!log.isDirectory()) {
-                System.out.println("N√£o existe o diret√≥rio tempor√°rio na pasta de execu√ß√£o! C:/temp");
+                System.out.println("N„o existe o diretÛrio tempor·rio na pasta de execuÁ„o! C:/temp");
                 return;
             }
             String[] listaLog = log.list();
@@ -67,10 +67,14 @@ public class Main {
 
             //Inicializa o buffer
             Log.iniBuf();
-            //Se for execu√ß√£o do SVM
+            
+            Log.loga("Log iniciado", "LOG");
+            //Se for execuÁ„o do SVM
             if (LeituraProperties.getInstance().leituraPropertiesInteiro("prop.tipoExe") == 1) {
+                Log.loga("Selecionado o tipo de execuÁ„o SVM", "EXECUCAO");
                 executaSVM();
             } else {
+                Log.loga("Selecionado o tipo de execuÁ„o ANALISADOR", "EXECUCAO");
                 executaAnalisador();
             }
 
@@ -84,36 +88,39 @@ public class Main {
             BaixaArquivoException, IndicadoresException, NomeParametrosException, SVMExecutorException, WekaSVMException,
             ParametroSVMException, FileNotFoundException, ClienteFTPException {
 
-        //Se n√£o foi informada a data inicial
+        //Se n„o foi informada a data inicial
         if (LeituraProperties.getInstance().leituraPropertiesDataAlpha("prop.DataIni").equals("")) {
-            System.out.println("√â obrigat√≥rio informar a data inicial para importa√ß√£o");
+            Log.loga("… obrigatÛrio informar a data inicial para importaÁ„o", "LOG");
             return;
         }
 
-        //Se n√£o foi informada a data final
+        //Se n„o foi informada a data final
         if (LeituraProperties.getInstance().leituraPropertiesDataAlpha("prop.DataFim").equals("")) {
-            System.out.println("√â obrigat√≥rio informar a data final para importa√ß√£o");
+            Log.loga("… obrigatÛrio informar a data final para importaÁ„o", "LOG");
             return;
         }
 
         
-        
-        //Pega a data inicial de exporta√ß√£o
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+
+        //Pega a data inicial de exportaÁ„o
         Calendar calendarAtu = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataIni");
-        
-        //Pega a data final de exporta√ß√£o
+        //Pega a data final de exportaÁ„o
         Calendar calendarFim = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataFim");
+        
+        Log.loga("Ser· executa a exportaÁ„o de " + formatter.format(calendarAtu.getTime()) + " atÈ " + formatter.format(calendarFim.getTime()), "EXECUCAO");
         
         //Enquanto o dia inicial for menor que o dia final
         while(calendarAtu.before(calendarFim) || calendarAtu.equals(calendarFim)){
             
-            //Se for s√°bado ou Domingo
+            //Se for s·bado ou Domingo
             if (calendarAtu.get(Calendar.DAY_OF_WEEK) == 1 || calendarAtu.get(Calendar.DAY_OF_WEEK) == 7){
                 //Incrementa o dia
                 calendarAtu.add(Calendar.DAY_OF_MONTH, 1);
                 continue;
             }
             
+            Log.loga("Iniciada exportaÁ„o do dia " + formatter.format(calendarAtu.getTime()), "EXECUCAO");
             Calendar dataInicial = (Calendar) calendarAtu.clone();
             dataInicial.add(Calendar.YEAR, -1);
             Calendar dataFinal = (Calendar) calendarAtu.clone();
@@ -131,9 +138,9 @@ public class Main {
         
         //Deleta os arquivos de ARFF
         File aRFF = new File(ARFFConstants.ARFF_FOLDER);
-        //Verifica se existe o diret√≥rio
+        //Verifica se existe o diretÛrio
         if (!aRFF.isDirectory()) {
-            System.out.println("N√£o existe o diret√≥rio ARFF na pasta de execu√ß√£o");
+            Log.loga("N„o existe o diretÛrio ARFF na pasta de execuÁ„o");
             return;
         }
 
@@ -149,9 +156,9 @@ public class Main {
 
         //Deleta os arquivos de resultado
         File resultado = new File(SVMConstants.RESULTADO_FOLDER);
-        //Verifica se existe o diret√≥rio
+        //Verifica se existe o diretÛrio
         if (!resultado.isDirectory()) {
-            System.out.println("N√£o existe o diret√≥rio RESULTADO na pasta de execu√ß√£o");
+            Log.loga("N„o existe o diretÛrio RESULTADO na pasta de execuÁ„o");
             return;
         }
 
@@ -166,7 +173,7 @@ public class Main {
             }
         }
 
-        //Obt√©m a lista de ativos que devem ser importados
+        //ObtÈm a lista de ativos que devem ser importados
         String[] ativos = LeituraProperties.getInstance().leituraPropertiesString("prop.ativos").split("#");
 
         //Varre a lista de ativos a serem importados
@@ -175,7 +182,7 @@ public class Main {
             String[] atiPaises = new String[2];
 
             if (ativos[i].contains(";")) {
-                //Obt√©m os ativos de cada pa√≠s
+                //ObtÈm os ativos de cada paÌs
                 atiPaises = ativos[i].split(";");
             } else {
                 atiPaises[0] = ativos[i];
@@ -185,8 +192,8 @@ public class Main {
             Log.buffAtivo(atiPaises[0]);
 
             //Criar arquivo ARFF
-            Log.loga("Ser√° gerado o arquivo ARFF", "ARFF");
-            //Inst√¢ncia a gera√ß√£o de arquivos ARFF
+            Log.loga("Ser· gerado o arquivo ARFF", "ARFF");
+            //Inst‚ncia a geraÁ„o de arquivos ARFF
             GeraArquivoARFF geraArquivoARFF = new GeraArquivoARFF(atiPaises[0], atiPaises[1], dataInicial, dataFinal);
             //Gera o arquivo ARFF com a quantidade de ativos indicada no properties
             String arquivoARFF = geraArquivoARFF.geraArquivo();
