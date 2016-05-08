@@ -91,6 +91,8 @@ public class WekaSVM implements Runnable {
             real = 0.1;
         }
 
+        //Tempo
+        parametrosSVM.setTime(fim - ini);
         //Valor real
         parametrosSVM.setReal(real);
         //Valor predito

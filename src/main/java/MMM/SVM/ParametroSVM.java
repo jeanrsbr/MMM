@@ -35,6 +35,8 @@ public class ParametroSVM implements Cloneable {
     private double predict;
     private double diffMod;
     private double percentualAcerto;
+    private long time;
+
 
     public ParametroSVM(int diaInicial, int tamanhoDoConjunto, int gridSearchEvaluation, int kernel, int type) throws ParametroSVMException {
         this.diaInicial = diaInicial;
@@ -96,7 +98,13 @@ public class ParametroSVM implements Cloneable {
         this.diaInicial = diaInicial;
     }
 
+    public long getTime() {
+        return time;
+    }
 
+    public void setTime(long time) {
+        this.time = time;
+    }
 
 
     public String getGridSearchEvaluationAlfa() throws ParametroSVMException {
@@ -202,7 +210,7 @@ public class ParametroSVM implements Cloneable {
 
     //Monta o cabeçalho da classe
     public String montaCabecalho() {
-        return "dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;close_anterior;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto";
+        return "dia_inicial;cost;gamma;tam_treino;evaluation;evaluationAlfa;kernel;kernelAlfa;type;typeAlfa;close_anterior;valor_real_anterior;valor_real;valor_predito;diffMod;perc_acerto;tempo";
     }
 
     public String montaLinha() throws ParametroSVMException {
@@ -239,6 +247,8 @@ public class ParametroSVM implements Cloneable {
         linha.append(EditaValores.edita2DecVirgula(diffMod));
         linha.append(";");
         linha.append(EditaValores.edita2DecVirgula(percentualAcerto));
+        linha.append(";");
+        linha.append(time);
 
         return linha.toString();
 
