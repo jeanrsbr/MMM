@@ -18,6 +18,7 @@ import MMM.ARFF.GeraArquivoARFF;
 import MMM.ARFF.PARAMETROS.IndicadoresException;
 import MMM.ARFF.PARAMETROS.NomeParametrosException;
 import MMM.MISC.ClienteFTPException;
+import MMM.MISC.SendEmail;
 import MMM.SVM.ParametroSVMException;
 import MMM.SVM.SVMConstants;
 import MMM.SVM.SVMExecutor;
@@ -26,6 +27,10 @@ import MMM.SVM.WekaSVMException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.mail.internet.AddressException;
+import org.apache.commons.mail.EmailException;
 
 /**
  *
@@ -67,7 +72,7 @@ public class Main {
 
             //Inicializa o buffer
             Log.iniBuf();
-            
+
             Log.loga("Log iniciado", "LOG");
             //Se for execução do SVM
             if (LeituraProperties.getInstance().leituraPropertiesInteiro("prop.tipoExe") == 1) {
@@ -78,7 +83,7 @@ public class Main {
                 executaAnalisador();
             }
 
-        } catch (InsereParametrosException | BaixaArquivoException | ImportadorException | GeraArquivoARFFException | IndicadoresException | NomeParametrosException | SVMExecutorException | WekaSVMException | ParametroSVMException | FileNotFoundException | ClienteFTPException ex) {
+        } catch (InsereParametrosException | BaixaArquivoException | ImportadorException | GeraArquivoARFFException | IndicadoresException | NomeParametrosException | SVMExecutorException | WekaSVMException | ParametroSVMException | FileNotFoundException | ClienteFTPException | EmailException | AddressException ex ) {
             Log.loga(ex.getMessage());
             ex.printStackTrace();
         }
@@ -86,7 +91,7 @@ public class Main {
 
     private static void executaSVM() throws GeraArquivoARFFException, ImportadorException, InsereParametrosException,
             BaixaArquivoException, IndicadoresException, NomeParametrosException, SVMExecutorException, WekaSVMException,
-            ParametroSVMException, FileNotFoundException, ClienteFTPException {
+            ParametroSVMException, FileNotFoundException, ClienteFTPException, EmailException, AddressException {
 
         //Se não foi informada a data inicial
         if (LeituraProperties.getInstance().leituraPropertiesDataAlpha("prop.DataIni").equals("")) {
@@ -100,26 +105,25 @@ public class Main {
             return;
         }
 
-        
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
         //Pega a data inicial de exportação
         Calendar calendarAtu = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataIni");
         //Pega a data final de exportação
         Calendar calendarFim = LeituraProperties.getInstance().leituraPropertiesDataCalendar("prop.DataFim");
-        
+
         Log.loga("Será executa a exportação de " + formatter.format(calendarAtu.getTime()) + " até " + formatter.format(calendarFim.getTime()), "EXECUCAO");
-        
+
         //Enquanto o dia inicial for menor que o dia final
-        while(calendarAtu.before(calendarFim) || calendarAtu.equals(calendarFim)){
-            
+        while (calendarAtu.before(calendarFim) || calendarAtu.equals(calendarFim)) {
+
             //Se for sábado ou Domingo
-            if (calendarAtu.get(Calendar.DAY_OF_WEEK) == 1 || calendarAtu.get(Calendar.DAY_OF_WEEK) == 7){
+            if (calendarAtu.get(Calendar.DAY_OF_WEEK) == 1 || calendarAtu.get(Calendar.DAY_OF_WEEK) == 7) {
                 //Incrementa o dia
                 calendarAtu.add(Calendar.DAY_OF_MONTH, 1);
                 continue;
             }
-            
+
             Log.loga("Iniciada exportação do dia " + formatter.format(calendarAtu.getTime()), "EXECUCAO");
             Calendar dataInicial = (Calendar) calendarAtu.clone();
             dataInicial.add(Calendar.YEAR, -1);
@@ -132,10 +136,10 @@ public class Main {
 
     private static void executaSVMDia(Date dataInicial, Date dataFinal) throws GeraArquivoARFFException, ImportadorException, InsereParametrosException,
             BaixaArquivoException, IndicadoresException, NomeParametrosException, SVMExecutorException, WekaSVMException,
-            ParametroSVMException, FileNotFoundException, ClienteFTPException {
+            ParametroSVMException, FileNotFoundException, ClienteFTPException, EmailException, AddressException {
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        
+
         //Deleta os arquivos de ARFF
         File aRFF = new File(ARFFConstants.ARFF_FOLDER);
         //Verifica se existe o diretório
@@ -162,7 +166,6 @@ public class Main {
             return;
         }
 
-        
         String[] listaResultado = resultado.list();
         for (int i = 0; i < listaResultado.length; i++) {
 
@@ -188,19 +191,35 @@ public class Main {
                 atiPaises[0] = ativos[i];
             }
 
-            //Direciona arquivo de LOG com o nome do ativo
-            Log.buffAtivo(atiPaises[0]);
+            try {
+                //Direciona arquivo de LOG com o nome do ativo
+                Log.buffAtivo(atiPaises[0]);
+                //Criar arquivo ARFF
+                Log.loga("Será gerado o arquivo ARFF", "ARFF");
+                //Instância a geração de arquivos ARFF
+                GeraArquivoARFF geraArquivoARFF = new GeraArquivoARFF(atiPaises[0], atiPaises[1], dataInicial, dataFinal);
+                //Gera o arquivo ARFF com a quantidade de ativos indicada no properties
+                String arquivoARFF = geraArquivoARFF.geraArquivo();
 
-            //Criar arquivo ARFF
-            Log.loga("Será gerado o arquivo ARFF", "ARFF");
-            //Instância a geração de arquivos ARFF
-            GeraArquivoARFF geraArquivoARFF = new GeraArquivoARFF(atiPaises[0], atiPaises[1], dataInicial, dataFinal);
-            //Gera o arquivo ARFF com a quantidade de ativos indicada no properties
-            String arquivoARFF = geraArquivoARFF.geraArquivo();
-
-            //Executar algoritmo SVM
-            SVMExecutor sVMExecutor = new SVMExecutor(arquivoARFF);
-            sVMExecutor.executaAnalise();
+                //Executar algoritmo SVM
+                SVMExecutor sVMExecutor = new SVMExecutor(arquivoARFF);
+                sVMExecutor.executaAnalise();
+            } catch (InsereParametrosException | BaixaArquivoException | ImportadorException | GeraArquivoARFFException | IndicadoresException | NomeParametrosException | SVMExecutorException | WekaSVMException | ParametroSVMException | FileNotFoundException | ClienteFTPException ex) {
+                Log.loga(ex.getMessage());
+                ex.printStackTrace();
+                StringBuffer parametros = new StringBuffer();
+                parametros.append("Ocorreu um problema ao realizar a geração do ativo ");
+                parametros.append(atiPaises[0]);
+                parametros.append("\n");
+                parametros.append("No dia ");
+                parametros.append(dataFinal);
+                parametros.append("\n");        
+                parametros.append("Com a seguinte mensagem: \n");
+                parametros.append(ex.getMessage());
+                SendEmail sendEmail = new SendEmail();
+                sendEmail.send("jeanrsbr@gmail.com", "moneymakermachinetcc@gmail.com", "Excecão", parametros.toString());
+                
+            }
 
         }
 
