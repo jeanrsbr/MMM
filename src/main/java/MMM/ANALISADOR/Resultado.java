@@ -31,8 +31,11 @@ public class Resultado {
         this.tipo = tipo;
         diffValores = valorPredito - valorHoje;
         percentualDiffValores = (valorPredito / valorHoje) * 100;
-        stopGain = valorHoje + (diffValores * 0.8);
-        stopLoss = valorHoje - (diffValores * 0.2667);        
+//        stopGain = valorHoje + (diffValores * 0.8);
+//        stopLoss = valorHoje - (diffValores * 0.2667);
+        stopGain = valorPredito;
+        stopLoss = valorPredito - (diffValores * 0.33);
+        
     }
 
     public String getAtivo() {

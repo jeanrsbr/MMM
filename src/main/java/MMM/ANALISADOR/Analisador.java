@@ -47,7 +47,7 @@ public class Analisador {
         //Separa os elementos do arquivo ARFF
         String[] nomeArq = arquivoARFF.split("_");
         String ativo = nomeArq[1].replaceAll(ARFFConstants.ARFF_EXT, "");
-        ativo = ativo.replaceAll(".SA", "");
+        ativo = ativo.replace(".SA", "");
         return ativo;
         
     }

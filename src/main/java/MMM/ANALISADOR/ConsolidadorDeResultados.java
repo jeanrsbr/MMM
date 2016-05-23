@@ -15,10 +15,12 @@ import MMM.SVM.SVMConstants;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
@@ -55,8 +57,8 @@ public class ConsolidadorDeResultados {
             //Popula array de resultados
             ArrayList<Resultado> resultados = new ArrayList<>();
             //ObtÃ©m a lista de arquivos do diretÃ³rio ARFF
-            String[] listaArquivosARFF = listaArquivos(ARFFConstants.ARFF_FOLDER);
-            String[] listaArquivosResultado = listaArquivos(SVMConstants.RESULTADO_FOLDER);
+            String[] listaArquivosARFF = listaArquivos(ARFFConstants.ARFF_FOLDER, ARFFConstants.ARFF_EXT);
+            String[] listaArquivosResultado = listaArquivos(SVMConstants.RESULTADO_FOLDER, SVMConstants.RESULTADO_EXT);
 
             Log.loga("Criando array com resultados preditos", "COMPRA");
 
@@ -135,14 +137,14 @@ public class ConsolidadorDeResultados {
 
             //Cria arquivo CSV com os melhores resultados
             Set<Date> chaves = melhoresResultados.keySet();
+
             //Varre os dados com os melhores resultados
             for (Date chave : chaves) {
 
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-
                 StringBuilder linha = new StringBuilder();
-
-                linha.append(formatter.format(chave));
+                //A predição foi feita no dia para descobrir o valor Máximo do dia seguinte, assim, a predição sempre se refere ao dia seguinte
+                linha.append(formatter.format(proxDiaUtil(chave)));
                 linha.append(";");
                 linha.append("1");
                 linha.append(";");
@@ -166,10 +168,36 @@ public class ConsolidadorDeResultados {
 
     }
 
+    //Retorna o próximo dia útil
+    private Date proxDiaUtil(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        //Incrementa o dia
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        //Se for sábado ou Domingo
+        if (calendar.get(Calendar.DAY_OF_WEEK) == 1 || calendar.get(Calendar.DAY_OF_WEEK) == 7) {
+            //Incrementa o dia
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        //Se for sábado ou Domingo
+        if (calendar.get(Calendar.DAY_OF_WEEK) == 1 || calendar.get(Calendar.DAY_OF_WEEK) == 7) {
+            //Incrementa o dia
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return calendar.getTime();
+    }
+
     //Retorna a lista de arquivos existentes no diretÃ³rio
-    private String[] listaArquivos(String name) {
-        File aRFF = new File(name);
-        return aRFF.list();
+    private String[] listaArquivos(String name, String ext) {
+        File list = new File(name);
+
+        FilenameFilter filenameFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(ext);
+            }
+        };
+        return list.list(filenameFilter);
 
     }
 
@@ -181,7 +209,11 @@ public class ConsolidadorDeResultados {
         }
 
         //Verifica se possui todos os arquivos ARFF necessÃ¡rios
-        if (listaArquivos(ARFFConstants.ARFF_FOLDER).length != listaArquivos(SVMConstants.RESULTADO_FOLDER).length) {
+        if (listaArquivos(ARFFConstants.ARFF_FOLDER, ARFFConstants.ARFF_EXT).length != listaArquivos(SVMConstants.RESULTADO_FOLDER, SVMConstants.RESULTADO_EXT).length) {
+
+            Log.loga("A quantidade de arquivos ARFF é " + listaArquivos(ARFFConstants.ARFF_FOLDER, ARFFConstants.ARFF_EXT).length, "PREDICOES");
+            Log.loga("A quantidade de arquivos Resultado é " + listaArquivos(SVMConstants.RESULTADO_FOLDER, SVMConstants.RESULTADO_EXT).length, "PREDICOES");
+
             throw new ConsolidadorDeResultadosException("A quantidade de arquivos ARFF não é igual a quantidade de Resultados");
         }
 
